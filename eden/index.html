@@ -1227,7 +1227,7 @@ const syncMute=()=>{muteBtn.textContent=SND.isMuted()?'🔇':'🔊'};syncMute();
 muteBtn.addEventListener('click',()=>{SND.init();SND.setMute(!SND.isMuted());syncMute()});
 // ---- ranking ----
 // オンラインランキング: Supabaseのプロジェクトを作ったら url と key（publishable / anon key）を入れる
-const RANK_CFG={url:'',key:''};
+const RANK_CFG={url:'https://jdccbrfiepebaqscgbvd.supabase.co',key:'sb_publishable_Wh3DANCobRHkGpX9D2heFg_PitJUfPR'};
 const rankOnline=()=>!!(RANK_CFG.url&&RANK_CFG.key);
 let lastResult=0,resultId=0,submittedId=-1,myRow=null;
 function localRows(){try{return JSON.parse(localStorage.getItem('eden_rank')||'[]')}catch(e){return []}}

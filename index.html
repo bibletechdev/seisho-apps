@@ -266,11 +266,11 @@ footer{text-align:center;padding:32px 20px 40px;background:linear-gradient(var(-
 
   // ---- いいね ----
   // みんなのいいね数を集計するには Supabase の url と key（publishable / anon key）を入れる
-  const LIKE_CFG={url:'',key:''};
+  const LIKE_CFG={url:'https://jdccbrfiepebaqscgbvd.supabase.co',key:'sb_publishable_Wh3DANCobRHkGpX9D2heFg_PitJUfPR'};
   const online=()=>!!(LIKE_CFG.url&&LIKE_CFG.key);
   const mine=()=>{try{return JSON.parse(localStorage.getItem('seisho_likes')||'{}')}catch(e){return {}}};
   const saveMine=m=>{try{localStorage.setItem('seisho_likes',JSON.stringify(m))}catch(e){}};
-  let counts={};
+  let counts={},loaded=false;
   const btns=[...document.querySelectorAll('.like')];
   function render(){
     const m=mine();
@@ -281,13 +281,13 @@ footer{text-align:center;padding:32px 20px 40px;background:linear-gradient(var(-
       b.querySelector('.lk-n').textContent=online()&&counts[a]!=null?counts[a]:'';
     });
     const t=document.getElementById('likeTotal'),sum=Object.values(counts).reduce((x,n)=>x+(+n||0),0);
-    t.hidden=!online();t.textContent='♥ みんなのいいね 合計 '+sum.toLocaleString()+'件';
+    t.hidden=!loaded;t.textContent='♥ みんなのいいね 合計 '+sum.toLocaleString()+'件';
   }
   async function loadCounts(){
     if(!online())return;
     try{
       const r=await fetch(LIKE_CFG.url+'/rest/v1/like_counts?select=app,n',{headers:{apikey:LIKE_CFG.key}});
-      if(!r.ok)return;(await r.json()).forEach(x=>counts[x.app]=x.n);render();
+      if(!r.ok)return;(await r.json()).forEach(x=>counts[x.app]=x.n);loaded=true;render();
     }catch(e){}
   }
   function burst(b){
