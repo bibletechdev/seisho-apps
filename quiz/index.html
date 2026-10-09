@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>聖書人物診断｜あなたは聖書のだれタイプ？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3EAD3; --ink:#1E2140; --gold:#B8862B; --gold-soft:#E7C671;
+  --plum:#6E3F7A; --line:rgba(30,33,64,.18); --card:#FBF6E9; --muted:rgba(30,33,64,.62);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141833; --ink:#F1E8D2; --gold:#E7C671; --gold-soft:#B8862B;
+    --plum:#C79BD3; --line:rgba(241,232,210,.18); --card:#1C2145; --muted:rgba(241,232,210,.62);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141833; --ink:#F1E8D2; --gold:#E7C671; --gold-soft:#B8862B;
+  --plum:#C79BD3; --line:rgba(241,232,210,.18); --card:#1C2145; --muted:rgba(241,232,210,.62);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.8; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:520px;margin:0 auto;padding:28px 20px 60px;min-height:100%;display:flex;flex-direction:column}
+h1,h2,.big{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex}
+
+/* start */
+.start{justify-content:center;text-align:center;gap:18px}
+.ornament{width:120px;height:120px;margin:0 auto 6px}
+.start h1{font-size:2.1rem;font-weight:800;line-height:1.3;letter-spacing:.02em}
+.start p{color:var(--muted);font-size:.98rem}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:4px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;color:var(--muted)}
+.btn{
+  appearance:none;border:0;cursor:pointer;font:inherit;font-weight:700;
+  background:var(--ink);color:var(--paper);border-radius:14px;padding:16px 22px;font-size:1.05rem;
+  width:100%;margin-top:14px;transition:transform .12s;
+}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible,.opt:focus-visible,.link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.btn.gold{background:var(--gold);color:#1E2140}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+
+/* quiz */
+.progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:28px}
+.progress i{display:block;height:100%;background:var(--gold);width:0;transition:width .35s ease}
+.qnum{font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.q{font-size:1.45rem;font-weight:700;line-height:1.45;margin-bottom:26px}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt{
+  appearance:none;cursor:pointer;font:inherit;text-align:left;
+  background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;
+  padding:16px 18px;font-size:1rem;line-height:1.55;transition:border-color .15s,background .15s;
+}
+.opt:hover{border-color:var(--gold)}
+.opt.pick{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--card))}
+.back{margin-top:22px;background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;align-self:flex-start;text-decoration:underline;text-underline-offset:4px}
+
+/* result */
+.res-label{text-align:center;color:var(--muted);font-size:.95rem}
+.card{
+  margin-top:14px;background:var(--card);border:2px solid var(--gold);border-radius:22px;
+  padding:30px 24px 26px;position:relative;text-align:center;
+}
+.card:before{
+  content:"";position:absolute;inset:7px;border:1px solid var(--gold);border-radius:15px;opacity:.55;pointer-events:none;
+}
+.card .who{font-size:.95rem;color:var(--muted);letter-spacing:.06em}
+.card h2{font-size:2.6rem;font-weight:800;line-height:1.2;margin:4px 0 2px;color:var(--ink)}
+.card .title{color:var(--plum);font-weight:700;font-size:1.05rem;margin-bottom:16px}
+.card .sym{width:150px;height:150px;margin:0 auto 12px}.card .sym svg{width:100%;height:100%;display:block}
+.faces{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:340px;margin:4px auto 0}.faces div{text-align:center;font-size:.8rem;color:var(--muted)}.faces svg{width:100%;height:auto;display:block;margin-bottom:2px}
+.card p.desc{text-align:left;font-size:.98rem;margin:0 0 14px}
+.traits{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px}
+.traits span{background:color-mix(in srgb,var(--gold) 18%,transparent);border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:700}
+.verse{
+  border-top:1px solid var(--line);padding-top:16px;text-align:left;
+}
+.verse .big{font-size:1.1rem;font-weight:700;line-height:1.7}
+.verse small{display:block;color:var(--muted);margin-top:6px;font-size:.85rem}
+.match{margin-top:22px;text-align:left;font-size:.92rem;color:var(--muted)}
+.match b{color:var(--ink)}
+.share{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* bridge */
+.bridge{margin-top:36px;border-top:1px solid var(--line);padding-top:26px}
+.bridge h3{font-family:"Shippori Mincho",serif;font-size:1.25rem;font-weight:700;margin-bottom:10px}
+.bridge p{font-size:.95rem;margin-bottom:14px}
+.link{display:block;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--ink);text-decoration:none;font-weight:700;margin-bottom:10px}
+.link small{display:block;font-weight:400;color:var(--muted);font-size:.85rem;margin-top:2px}
+.foot{margin-top:30px;text-align:center;color:var(--muted);font-size:.8rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<section class="screen start on" id="s-start">
+  <svg class="ornament" viewBox="0 0 120 120" aria-hidden="true">
+    <circle cx="60" cy="60" r="54" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
+    <circle cx="60" cy="60" r="46" fill="none" stroke="var(--gold)" stroke-width=".8" opacity=".6"/>
+    <path d="M60 22 L64 52 L94 60 L64 68 L60 98 L56 68 L26 60 L56 52 Z" fill="var(--gold)"/>
+    <circle cx="60" cy="60" r="5" fill="var(--paper)"/>
+  </svg>
+  <h1>あなたは聖書の<br>だれタイプ？</h1>
+  <p>12の質問に答えると、あなたにいちばん近い聖書の人物がわかります。所要時間は1分。</p>
+  <div class="faces" id="faces"></div>
+  <button class="btn gold" onclick="startQuiz()">診断をはじめる</button>
+</section>
+
+<!-- QUIZ -->
+<section class="screen" id="s-quiz">
+  <div class="progress"><i id="bar"></i></div>
+  <div class="qnum" id="qnum"></div>
+  <div class="q" id="qtext"></div>
+  <div class="opts" id="opts"></div>
+  <button class="back" id="back" onclick="prevQ()">ひとつ前に戻る</button>
+</section>
+
+<!-- RESULT -->
+<section class="screen" id="s-result">
+  <div class="res-label">あなたにいちばん近いのは</div>
+  <div class="card" id="card"></div>
+  <div class="match" id="match"></div>
+  <div class="share">
+    <button class="btn gold" onclick="shareResult()">結果をシェアする</button>
+    <a class="btn ghost" id="xlink" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;display:block">Xに投稿する</a>
+    <button class="btn ghost" onclick="restart()">もう一度診断する</button>
+  </div>
+
+  <div class="bridge">
+    <h3 id="bridge-title"></h3>
+    <p id="bridge-text"></p>
+    <a class="link" id="read-link" target="_blank" rel="noopener">この人物の物語を聖書で読む<small id="read-ref"></small></a>
+    <a class="link" href="https://www.bible.com/ja" target="_blank" rel="noopener">聖書を無料で読む・聞く<small>YouVersion 聖書アプリ（日本語対応）</small></a>
+  </div>
+  <div class="foot">結果は性格の傾向を楽しむためのものです。</div>
+</section>
+
+</div>
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+// 人物データ ---------------------------------------------------
+const CH = {
+  david:  {name:"ダビデ", title:"情熱の詩人王", sym:"harp",
+    traits:["情熱的","表現豊か","リーダー気質","立ち直りが早い"],
+    desc:"感情が豊かで、喜びも悲しみも全力。人を惹きつけるカリスマがあり、失敗しても正直に向き合って立ち上がれる人です。詩や音楽など、心を形にするのも得意。",
+    verse:"主は私の羊飼い。私には何も欠けることがない。", ref:"詩篇 23篇1節",
+    bridge:"ダビデは英雄でありながら、大きな過ちも犯しました。それでも「神の心にかなう人」と呼ばれたのは、失敗のたびに神に立ち返ったからです。",
+    read:"https://www.bible.com/ja/bible/1819/1SA.16", readref:"サムエル記 第一 16章〜"},
+  moses:  {name:"モーセ", title:"慎重な導き手", sym:"staff",
+    traits:["責任感が強い","慎重","忍耐強い","人の痛みに敏感"],
+    desc:"自分に自信がなくても、任されたことは最後までやり抜くタイプ。口下手でも行動で信頼を得ます。人の重荷を一緒に背負いすぎて疲れることも。",
+    verse:"わたしは必ずあなたと共にいる。", ref:"出エジプト記 3章12節",
+    bridge:"モーセは「私には無理です」と何度も言いました。神は「あなたにできるか」ではなく「わたしが共にいる」と答えました。",
+    read:"https://www.bible.com/ja/bible/1819/EXO.3", readref:"出エジプト記 3章〜"},
+  peter:  {name:"ペテロ", title:"熱血の行動派", sym:"fish",
+    traits:["行動が早い","熱い","正直","失敗しても前へ"],
+    desc:"考えるより先に動く、ムードメーカー。思ったことをそのまま言うので誤解もされますが、その裏表のなさが人に愛されます。転んでも立ち上がる強さがあります。",
+    verse:"あなたはわたしを愛するか。", ref:"ヨハネの福音書 21章15〜17節",
+    bridge:"ペテロは一番弟子なのに、いざという時にイエスを3度「知らない」と言いました。それでもイエスは彼を見捨てず、もう一度「わたしについてきなさい」と言いました。",
+    read:"https://www.bible.com/ja/bible/1819/JHN.21", readref:"ヨハネの福音書 21章"},
+  paul:   {name:"パウロ", title:"信念の伝道者", sym:"scroll",
+    traits:["論理的","一途","行動力","言葉で人を動かす"],
+    desc:"納得したら全力で突き進む、筋の通った人。文章や議論が得意で、周りを説得する力があります。一度決めたことは簡単には曲げません。",
+    verse:"私を強くしてくださる方によって、私はどんなことでもできる。", ref:"ピリピ人への手紙 4章13節",
+    bridge:"パウロはもともとクリスチャンを迫害していた人でした。その彼が人生を180度変えたのは、旅の途中でイエスに出会ったからです。",
+    read:"https://www.bible.com/ja/bible/1819/ACT.9", readref:"使徒の働き 9章"},
+  ruth:   {name:"ルツ", title:"寄り添う忠実な人", sym:"wheat",
+    traits:["誠実","面倒見がいい","粘り強い","縁を大切にする"],
+    desc:"派手さはないけれど、大切な人のそばに黙って居続けられる人。損得より「誰と一緒にいるか」で選びます。地道な努力がやがて大きな実を結ぶタイプ。",
+    verse:"あなたの民は私の民、あなたの神は私の神です。", ref:"ルツ記 1章16節",
+    bridge:"異邦人だったルツは、姑ナオミへの忠実さから神を知り、やがてダビデ王、そしてイエスの系図に名を連ねることになります。",
+    read:"https://www.bible.com/ja/bible/1819/RUT.1", readref:"ルツ記 1章〜4章"},
+  esther: {name:"エステル", title:"ここ一番で立つ人", sym:"crown",
+    traits:["勇気がある","品がある","空気を読める","決断力"],
+    desc:"普段は控えめでも、大事な場面で腹をくくれる人。周りをよく見ていて、ベストなタイミングで動きます。「自分がやらなきゃ」と思ったら覚悟が決まります。",
+    verse:"この時のためにこそ、あなたはこの地位に着いたのかもしれない。", ref:"エステル記 4章14節",
+    bridge:"エステルは命がけで王の前に出て、民族を救いました。「もし死ななければならないのなら、死にます」という言葉に、彼女の覚悟が表れています。",
+    read:"https://www.bible.com/ja/bible/1819/EST.4", readref:"エステル記 4章"},
+  joseph: {name:"ヨセフ", title:"夢を持ち続ける人", sym:"star",
+    traits:["夢がある","誠実","逆境に強い","赦せる"],
+    desc:"どんな環境でも腐らず、目の前のことを丁寧にやる人。理不尽な目にあっても人のせいにせず、時間をかけて信頼を勝ち取ります。最後には人を赦せる器があります。",
+    verse:"あなたがたは悪を企んだが、神はそれを良いことに変えてくださった。", ref:"創世記 50章20節",
+    bridge:"兄たちに売られ、無実の罪で投獄されたヨセフは、後にエジプトの大臣となり、自分を売った兄たちを赦して救いました。",
+    read:"https://www.bible.com/ja/bible/1819/GEN.37", readref:"創世記 37章〜50章"},
+  jonah:  {name:"ヨナ", title:"逃げても呼ばれる人", sym:"wave",
+    traits:["マイペース","本音が強い","不器用","でも憎めない"],
+    desc:"気が進まないことからは全力で逃げる、正直者。でも不思議と最後には大事な役目を果たしてしまいます。素直じゃないけど、心の奥は優しい人。",
+    verse:"苦しみの中から主に呼び求めると、主は答えてくださった。", ref:"ヨナ書 2章2節",
+    bridge:"神から逃げて船に乗り、大きな魚に飲まれたヨナ。それでも神はヨナを見捨てず、逃げた先まで追いかけて、もう一度チャンスを与えました。",
+    read:"https://www.bible.com/ja/bible/1819/JON.1", readref:"ヨナ書 1章〜4章"},
+  daniel: {name:"ダニエル", title:"ブレない誠実な人", sym:"lion",
+    traits:["芯が強い","冷静","信頼される","知的"],
+    desc:"周りに流されず、自分の軸を静かに守れる人。派手に主張しないのに、気づけば一目置かれています。プレッシャーの中でも落ち着いて判断でき、敵にさえ「あの人は正しい」と言わせるタイプ。",
+    verse:"私の神は御使いを送り、獅子の口を閉じてくださった。", ref:"ダニエル書 6章22節",
+    bridge:"異国で高官になったダニエルは、王の命令より神への祈りを選び、獅子の穴に投げ込まれました。神は彼を守り、王までもが神をたたえました。",
+    read:"https://www.bible.com/ja/bible/1819/DAN.6", readref:"ダニエル書 6章"},
+  solomon:{name:"ソロモン", title:"知恵と好奇心の王", sym:"gem",
+    traits:["知的好奇心","センスがいい","器用","欲張り"],
+    desc:"何でも面白がって学び、センスよくこなす人。人の相談に鋭い答えを返せる知恵者。ただし興味が広すぎて手を広げ、大事なことを見失いそうになることも。",
+    verse:"知恵の初めは主を恐れること。", ref:"箴言 9章10節",
+    bridge:"神に「何が欲しいか」と聞かれ、富でも長寿でもなく「知恵」を求めたソロモン。神はその願いを喜び、求めなかったものまで与えました。",
+    read:"https://www.bible.com/ja/bible/1819/1KI.3", readref:"列王記 第一 3章"},
+  martha: {name:"マルタ", title:"動いて支える人", sym:"bowl",
+    traits:["世話焼き","段取り上手","現実的","頑張り屋"],
+    desc:"人が集まると、頼まれなくても動き出す人。段取りが良く、みんなが快適に過ごせるよう気を配ります。頑張りすぎて「なんで私ばっかり」と思うのは、それだけ愛情が深い証拠。",
+    verse:"必要なことは一つだけ。", ref:"ルカの福音書 10章42節",
+    bridge:"イエスをもてなそうと忙しく働くマルタに、イエスは「あなたは多くのことに心を乱している」と優しく語りかけました。頑張るあなたも、まず座って休んでいいのです。",
+    read:"https://www.bible.com/ja/bible/1819/LUK.10", readref:"ルカの福音書 10章38〜42節"},
+  samson: {name:"サムソン", title:"型破りな怪力", sym:"pillar",
+    traits:["エネルギッシュ","衝動的","規格外","憎めない"],
+    desc:"常識にとらわれず、圧倒的なパワーで突き進む人。ルールより気持ち優先で、ときどき大失敗もしますが、その破天荒さが人を惹きつけます。恋愛には弱いかも。",
+    verse:"神よ、どうか今一度、私を強めてください。", ref:"士師記 16章28節",
+    bridge:"神から与えられた力を自分勝手に使い、すべてを失ったサムソン。しかし最後の祈りに神は応え、彼は人生最大の働きを果たしました。",
+    read:"https://www.bible.com/ja/bible/1819/JDG.13", readref:"士師記 13章〜16章"},
+};
+
+
+// 質問データ（各選択肢は加点する人物）----------------------------
+const Q = [
+  {q:"急に大きな役目を任されたら？", o:[
+    ["よし、やってやる。燃える。",["david","peter","samson"]],
+    ["私で大丈夫かな…と不安になる",["moses","esther"]],
+    ["計画を立ててから引き受ける",["paul","joseph","daniel"]],
+    ["できれば誰かに代わってほしい",["jonah","ruth"]]]},
+  {q:"友達が落ち込んでいる時、あなたは？", o:[
+    ["とにかく隣にいる",["ruth","moses"]],
+    ["笑わせて元気づける",["peter","david","samson"]],
+    ["解決策を一緒に考える",["paul","solomon"]],
+    ["ごはんを作って世話を焼く",["martha","ruth"]]]},
+  {q:"自分の失敗に気づいた時は？", o:[
+    ["すぐ謝って切り替える",["peter","david"]],
+    ["しばらく落ち込んで反省する",["moses","jonah"]],
+    ["原因を分析して次に活かす",["paul","joseph","solomon"]],
+    ["黙って、行いで取り返す",["daniel","martha"]]]},
+  {q:"休日の理想の過ごし方は？", o:[
+    ["音楽・映画・創作に浸る",["david","solomon"]],
+    ["大切な人とゆっくり過ごす",["ruth","moses","martha"]],
+    ["本を読んだり学んだりする",["paul","daniel"]],
+    ["体を動かす・遠出する",["samson","peter"]]]},
+  {q:"グループの中でのあなたの役割は？", o:[
+    ["盛り上げ役・ムードメーカー",["peter","samson"]],
+    ["まとめ役・調整役",["moses","esther"]],
+    ["アイデアや意見を出す人",["paul","solomon"]],
+    ["黙って支える縁の下の力持ち",["ruth","martha","daniel"]]]},
+  {q:"理不尽な目にあったら？", o:[
+    ["その場で言い返す",["peter","samson"]],
+    ["黙って耐えて、いつか見返す",["joseph","ruth"]],
+    ["ベストなタイミングを待って動く",["esther","daniel"]],
+    ["その場からいなくなる",["jonah","david"]]]},
+  {q:"あなたが一番大切にしているものは？", o:[
+    ["情熱・夢",["david","joseph"]],
+    ["人とのつながり",["ruth","peter","martha"]],
+    ["筋を通すこと",["paul","daniel"]],
+    ["自由・面白さ",["jonah","samson","solomon"]]]},
+  {q:"周りからよく言われることは？", o:[
+    ["熱いね／パワフルだね",["david","samson"]],
+    ["真面目だね／責任感あるね",["moses","daniel"]],
+    ["頭いいね／センスいいね",["solomon","paul","esther"]],
+    ["優しいね／気が利くね",["ruth","martha"]]]},
+  {q:"やりたくないことを頼まれたら？", o:[
+    ["面倒でも、頼まれたらやる",["moses","martha"]],
+    ["理由を聞いて納得したらやる",["paul","daniel"]],
+    ["「やります！」と言って後で後悔",["peter","david"]],
+    ["全力で逃げる",["jonah","samson"]]]},
+  {q:"欲しいものを一つ選べるなら？", o:[
+    ["有り余る力",["samson","david"]],
+    ["深い知恵",["solomon","daniel"]],
+    ["長く続く幸せな家庭",["ruth","martha"]],
+    ["自分の使命を果たすチャンス",["esther","paul"]]]},
+  {q:"新しい環境に入った時は？", o:[
+    ["すぐ友達を作る",["peter","samson"]],
+    ["様子を見て、静かに信頼を積む",["daniel","joseph"]],
+    ["役割を見つけて動き出す",["martha","moses"]],
+    ["なじめなくて帰りたくなる",["jonah","ruth"]]]},
+  {q:"人生で一度は経験してみたいのは？", o:[
+    ["大舞台で注目を浴びる",["david","esther","samson"]],
+    ["誰かの人生を根本から変える",["paul","peter"]],
+    ["世界の謎を解き明かす",["solomon","daniel"]],
+    ["逆境から大逆転する",["joseph","jonah"]]]},
+];
+
+// アイコン（結果カード用）--------------------------------------
+const SYM = {
+  harp:`<path d="M20 70 Q20 20 60 14 L60 74 Q40 74 20 70Z" fill="none" stroke="var(--gold)" stroke-width="2.5"/><path d="M32 30v38M42 22v50M52 18v56" stroke="var(--gold)" stroke-width="1.5"/>`,
+  staff:`<path d="M40 76 L40 26 Q40 12 54 14 Q64 16 60 28" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/><path d="M24 74 Q42 62 60 74" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity=".6"/>`,
+  fish:`<path d="M12 42 Q40 14 66 42 Q40 70 12 42Z M66 42 L80 30 L80 54Z" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="26" cy="38" r="2.5" fill="var(--gold)"/>`,
+  scroll:`<path d="M22 20 h44 v40 h-44Z" fill="none" stroke="var(--gold)" stroke-width="2.5"/><path d="M22 20 q-8 0 -8 6 q0 6 8 6 M66 60 q8 0 8 -6 q0 -6 -8 -6" fill="none" stroke="var(--gold)" stroke-width="2.5"/><path d="M32 32h24M32 40h24M32 48h16" stroke="var(--gold)" stroke-width="1.5"/>`,
+  wheat:`<path d="M42 78 V26" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round"/><path d="M42 34 q-14 -2 -14 -14 q14 2 14 14Z M42 46 q-14 -2 -14 -14 q14 2 14 14Z M42 58 q-14 -2 -14 -14 q14 2 14 14Z M42 34 q14 -2 14 -14 q-14 2 -14 14Z M42 46 q14 -2 14 -14 q-14 2 -14 14Z M42 58 q14 -2 14 -14 q-14 2 -14 14Z" fill="none" stroke="var(--gold)" stroke-width="2"/>`,
+  crown:`<path d="M16 62 L16 30 L32 46 L42 20 L52 46 L68 30 L68 62Z" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/><path d="M16 68 h52" stroke="var(--gold)" stroke-width="2.5"/>`,
+  star:`<path d="M42 10 L48 34 L72 40 L48 46 L42 70 L36 46 L12 40 L36 34Z" fill="var(--gold)"/><circle cx="42" cy="40" r="4" fill="var(--card)"/>`,
+  wave:`<path d="M8 40 q10 -12 20 0 t20 0 t20 0 t16 0" fill="none" stroke="var(--gold)" stroke-width="2.5"/><path d="M8 56 q10 -12 20 0 t20 0 t20 0 t16 0" fill="none" stroke="var(--gold)" stroke-width="2.5" opacity=".6"/><path d="M8 24 q10 -12 20 0 t20 0 t20 0 t16 0" fill="none" stroke="var(--gold)" stroke-width="2.5" opacity=".35"/>`,
+};
+
+
+// 人物イラスト（オリジナルSVG）----------------------------------
+function portrait(o){
+  const hair = o.hair || '';
+  const beard = o.beard ? `<path d="M52 92 q4 34 28 40 q24 -6 28 -40 q-10 18 -28 18 q-18 0 -28 -18Z" fill="${o.beard}"/>` : '';
+  return `<svg viewBox="0 0 160 160" aria-hidden="true">
+  <defs><clipPath id="c${o.id}"><circle cx="80" cy="80" r="76"/></clipPath>
+  <radialGradient id="g${o.id}" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="${o.bg2}"/><stop offset="1" stop-color="${o.bg}"/></radialGradient></defs>
+  <circle cx="80" cy="80" r="76" fill="url(#g${o.id})"/>
+  <g clip-path="url(#c${o.id})">
+    ${o.back||''}
+    <path d="M28 160 q0 -46 52 -50 q52 4 52 50Z" fill="${o.robe}"/>
+    ${o.robeDeco||''}
+    <rect x="70" y="98" width="20" height="20" fill="${o.skin}"/>
+    <ellipse cx="80" cy="80" rx="30" ry="34" fill="${o.skin}"/>
+    ${beard}
+    ${hair}
+    <ellipse cx="68" cy="82" rx="3.2" ry="4" fill="#2A1F1A"/><ellipse cx="92" cy="82" rx="3.2" ry="4" fill="#2A1F1A"/>
+    <circle cx="69.3" cy="80.5" r="1.1" fill="#fff"/><circle cx="93.3" cy="80.5" r="1.1" fill="#fff"/>
+    <path d="M61 73 q7 -4 14 0 M85 73 q7 -4 14 0" fill="none" stroke="${o.brow||'#3A2A22'}" stroke-width="2" stroke-linecap="round"/>
+    ${o.mouth || '<path d="M74 97 q6 5 12 0" fill="none" stroke="#8C4A3C" stroke-width="2" stroke-linecap="round"/>'}
+    <ellipse cx="62" cy="92" rx="5" ry="3" fill="#E8907A" opacity=".45"/><ellipse cx="98" cy="92" rx="5" ry="3" fill="#E8907A" opacity=".45"/>
+    ${o.head||''}
+    ${o.prop||''}
+  </g>
+  <circle cx="80" cy="80" r="76" fill="none" stroke="var(--gold)" stroke-width="2"/>
+</svg>`;
+}
+const P = {
+  david: portrait({id:'d', bg:'#7A2E3B', bg2:'#C9505F', skin:'#F2C9A4', robe:'#B7302F',
+    robeDeco:'<path d="M60 116 q20 10 40 0 v44 h-40Z" fill="#E8B84A" opacity=".35"/>',
+    hair:'<path d="M48 78 q-2 -36 32 -38 q34 2 32 38 q-6 -18 -18 -20 q-10 12 -28 8 q-6 12 -18 12Z" fill="#B85C2C"/><path d="M48 78 q2 -14 12 -18 q-4 14 -12 18Z" fill="#B85C2C"/>',
+    head:'<path d="M52 50 l6 -12 l8 10 l7 -14 l7 14 l8 -10 l6 12Z" fill="#E8B84A"/><circle cx="80" cy="42" r="2.5" fill="#B7302F"/>',
+    prop:'<path d="M112 100 q6 -40 32 -46 v52 q-16 -2 -32 -6Z" fill="none" stroke="#E8B84A" stroke-width="4" stroke-linejoin="round"/><path d="M120 76v26M128 66v34M136 60v42" stroke="#F7E4A6" stroke-width="2"/>'}),
+  moses: portrait({id:'m', bg:'#2E4A6B', bg2:'#5B7FA6', skin:'#E5B58C', robe:'#6B5B4B', beard:'#EDE4D6',
+    robeDeco:'<path d="M80 110 v50" stroke="#B49C7E" stroke-width="6"/>',
+    hair:'<path d="M50 74 q0 -30 30 -32 q30 2 30 32 q-8 -14 -30 -14 q-22 0 -30 14Z" fill="#EDE4D6"/>',
+    head:'<path d="M46 70 q34 -50 68 0 v-10 q-34 -46 -68 0Z" fill="#8C7A66"/>',
+    brow:'#D9CDB9',
+    prop:'<path d="M132 160 V56 q0 -12 -12 -10 q-10 2 -6 12" fill="none" stroke="#8A5A2B" stroke-width="6" stroke-linecap="round"/><g transform="translate(14 96)"><path d="M0 40 V10 q0 -10 10 -10 h6 q10 0 10 10 v30Z" fill="#C9BBA3"/><path d="M6 12h14M6 20h14M6 28h14" stroke="#6B5B4B" stroke-width="2"/></g>'}),
+  peter: portrait({id:'p', bg:'#1F5F6E', bg2:'#4FA3B0', skin:'#D9A277', robe:'#3E6B7A', beard:'#4A3325',
+    hair:'<path d="M50 76 q-4 -32 30 -34 q34 2 30 34 q-6 -12 -14 -16 q-8 8 -16 4 q-8 8 -16 2 q-8 10 -14 10Z" fill="#4A3325"/>',
+    robeDeco:'<path d="M40 140 l8 -12 l8 12 l8 -12 l8 12 l8 -12 l8 12 l8 -12 l8 12 l8 -12 l8 12" fill="none" stroke="#9FD3D9" stroke-width="1.5"/>',
+    back:'<path d="M0 130 q20 -10 40 0 t40 0 t40 0 t40 0 v30 h-160Z" fill="#2E7C8C" opacity=".6"/>',
+    prop:'<path d="M112 128 q16 -14 32 0 q-16 14 -32 0Z M144 128 l10 -8 v16Z" fill="#9FD3D9"/><circle cx="120" cy="126" r="1.8" fill="#1F5F6E"/>'}),
+  paul: portrait({id:'a', bg:'#4A3A2A', bg2:'#8C6E4E', skin:'#E0B48F', robe:'#7A2D2D', beard:'#3B2A22',
+    hair:'<path d="M50 74 q4 -6 12 -8 q-2 10 -12 8Z M110 74 q-4 -6 -12 -8 q2 10 12 8Z" fill="#3B2A22"/>',
+    robeDeco:'<path d="M80 110 v50" stroke="#C9A25C" stroke-width="3"/>',
+    prop:'<g transform="translate(108 96)"><rect x="0" y="6" width="34" height="40" rx="3" fill="#EFE3C8"/><rect x="-4" y="0" width="42" height="9" rx="4" fill="#C9A25C"/><rect x="-4" y="43" width="42" height="9" rx="4" fill="#C9A25C"/><path d="M6 18h22M6 26h22M6 34h14" stroke="#7A2D2D" stroke-width="2"/></g>'}),
+  ruth: portrait({id:'r', bg:'#6B5A1E', bg2:'#C9A63C', skin:'#EAC0A0', robe:'#7A8B5E',
+    hair:'<path d="M50 84 q-2 -40 30 -42 q32 2 30 42 q-6 -22 -30 -22 q-24 0 -30 22Z" fill="#2E1E14"/>',
+    head:'<path d="M44 92 q-4 -60 36 -62 q40 2 36 62 q-4 -44 -36 -46 q-32 2 -36 46Z" fill="#E3C89A"/><path d="M44 92 q8 -6 12 6 q-4 14 -12 12Z M116 92 q-8 -6 -12 6 q4 14 12 12Z" fill="#E3C89A"/>',
+    prop:'<g transform="translate(118 84)"><path d="M12 76 V20" stroke="#C9A63C" stroke-width="4" stroke-linecap="round"/><path d="M12 30 q-14 -2 -14 -16 q14 2 14 16Z M12 44 q-14 -2 -14 -16 q14 2 14 16Z M12 58 q-14 -2 -14 -16 q14 2 14 16Z M12 30 q14 -2 14 -16 q-14 2 -14 16Z M12 44 q14 -2 14 -16 q-14 2 -14 16Z M12 58 q14 -2 14 -16 q-14 2 -14 16Z" fill="#F0D57A"/></g>'}),
+  esther: portrait({id:'e', bg:'#4B2A5E', bg2:'#8E5BA6', skin:'#EFC7A8', robe:'#8E2E6B',
+    hair:'<path d="M48 90 q-4 -46 32 -48 q36 2 32 48 q-4 -30 -32 -30 q-28 0 -32 30Z" fill="#1E1418"/><path d="M48 90 v30 q-10 -14 0 -30Z M112 90 v30 q10 -14 0 -30Z" fill="#1E1418"/>',
+    robeDeco:'<path d="M56 116 q24 14 48 0" fill="none" stroke="#E8B84A" stroke-width="3"/>',
+    head:'<path d="M54 52 l6 -14 l8 10 l6 -16 l6 16 l8 -10 l6 14Z" fill="#E8B84A"/><circle cx="80" cy="40" r="2.5" fill="#B0356B"/><circle cx="66" cy="44" r="2" fill="#B0356B"/><circle cx="94" cy="44" r="2" fill="#B0356B"/>',
+    prop:'<circle cx="52" cy="104" r="3" fill="#E8B84A"/><circle cx="108" cy="104" r="3" fill="#E8B84A"/>'}),
+  joseph: portrait({id:'j', bg:'#1E3A5C', bg2:'#3E6FA6', skin:'#E6B892', robe:'#2B6E9C',
+    hair:'<path d="M50 78 q-2 -34 30 -36 q32 2 30 36 q-6 -16 -16 -18 q-8 10 -22 6 q-8 10 -22 12Z" fill="#2E1E14"/>',
+    robeDeco:'<path d="M28 160 q0 -46 52 -50 q52 4 52 50Z" fill="url(#coat)"/><defs><linearGradient id="coat" x1="0" x2="1"><stop offset="0" stop-color="#D64545"/><stop offset=".25" stop-color="#E8B84A"/><stop offset=".5" stop-color="#4CA36B"/><stop offset=".75" stop-color="#2B6E9C"/><stop offset="1" stop-color="#8E5BA6"/></linearGradient></defs><path d="M72 112 q8 6 16 0 v48 h-16Z" fill="#F3EAD3"/>',
+    back:'<path d="M132 18 l4 12 l12 4 l-12 4 l-4 12 l-4 -12 l-12 -4 l12 -4Z" fill="#F7E4A6"/><circle cx="34" cy="40" r="2" fill="#F7E4A6"/><circle cx="24" cy="66" r="1.5" fill="#F7E4A6"/><circle cx="118" cy="56" r="1.5" fill="#F7E4A6"/>'}),
+  jonah: portrait({id:'n', bg:'#1B4A5A', bg2:'#3E8C9C', skin:'#DDAA82', robe:'#5B6E6B', beard:'#5C4030',
+    hair:'<path d="M48 80 q-6 -36 32 -40 q38 4 32 40 q-4 -12 -10 -16 q-4 12 -14 6 q-6 10 -16 4 q-8 12 -16 8 q-4 -2 -8 -2Z" fill="#5C4030"/>',
+    mouth:'<path d="M74 98 q6 -4 12 0" fill="none" stroke="#8C4A3C" stroke-width="2" stroke-linecap="round"/>',
+    back:'<path d="M0 118 q20 -14 40 0 t40 0 t40 0 t40 0 v42 h-160Z" fill="#2E7C8C" opacity=".7"/><path d="M0 134 q20 -14 40 0 t40 0 t40 0 t40 0 v26 h-160Z" fill="#245F6E" opacity=".8"/>',
+    prop:'<path d="M104 140 q20 -20 44 -4 q-20 18 -44 4Z M148 136 l10 -10 v20Z" fill="#7FB8C4"/><circle cx="114" cy="136" r="2" fill="#1B4A5A"/>'}),
+  daniel: portrait({id:'l', bg:'#3B2E5A', bg2:'#6B5A9E', skin:'#E3B48E', robe:'#2F4C7A',
+    hair:'<path d="M50 78 q-2 -34 30 -36 q32 2 30 36 q-8 -16 -30 -16 q-22 0 -30 16Z" fill="#1E1418"/>',
+    robeDeco:'<path d="M80 110 v50" stroke="#C9A25C" stroke-width="3"/>',
+    back:'<circle cx="34" cy="44" r="1.5" fill="#F7E4A6"/><circle cx="126" cy="36" r="2" fill="#F7E4A6"/><circle cx="20" cy="76" r="1.5" fill="#F7E4A6"/>',
+    prop:'<g transform="translate(104 108)"><ellipse cx="22" cy="24" rx="22" ry="18" fill="#C98B3A"/><circle cx="22" cy="22" r="13" fill="#E8B26A"/><circle cx="17" cy="20" r="1.8" fill="#2A1F1A"/><circle cx="27" cy="20" r="1.8" fill="#2A1F1A"/><path d="M19 27 q3 3 6 0" fill="none" stroke="#5C3A1E" stroke-width="1.5"/><path d="M22 24 l-2 3 h4Z" fill="#5C3A1E"/></g>'}),
+  solomon: portrait({id:'s', bg:'#6B4A1A', bg2:'#C8963E', skin:'#E6B892', robe:'#6E2E6E', beard:'#2E1E14',
+    hair:'<path d="M50 78 q-2 -34 30 -36 q32 2 30 36 q-8 -16 -30 -16 q-22 0 -30 16Z" fill="#2E1E14"/>',
+    robeDeco:'<path d="M56 116 q24 14 48 0" fill="none" stroke="#E8B84A" stroke-width="3"/><path d="M80 116 v44" stroke="#E8B84A" stroke-width="2"/>',
+    head:'<path d="M50 52 h60 v-10 l-8 6 l-7 -12 l-7 8 l-8 -14 l-8 14 l-7 -8 l-7 12 l-8 -6Z" fill="#E8B84A"/><circle cx="80" cy="40" r="3" fill="#3E9E9E"/>',
+    prop:'<path d="M118 92 l12 -10 l12 10 l-12 24Z" fill="#5CC8C8"/><path d="M118 92 h24 l-12 24Z" fill="#8EE0E0" opacity=".7"/>'}),
+  martha: portrait({id:'t', bg:'#7A4A2E', bg2:'#C98A5A', skin:'#EAC0A0', robe:'#B0563A',
+    hair:'<path d="M50 84 q-2 -40 30 -42 q32 2 30 42 q-6 -22 -30 -22 q-24 0 -30 22Z" fill="#4A2E1E"/>',
+    head:'<path d="M44 90 q-4 -58 36 -60 q40 2 36 60 q-4 -42 -36 -44 q-32 2 -36 44Z" fill="#EFE0C8"/>',
+    robeDeco:'<path d="M60 118 q20 8 40 0 v42 h-40Z" fill="#F3EAD3" opacity=".85"/>',
+    prop:'<g transform="translate(106 104)"><path d="M0 12 h44 q-2 26 -22 28 q-20 -2 -22 -28Z" fill="#E0C9A0"/><ellipse cx="22" cy="12" rx="22" ry="5" fill="#B08A5A"/><path d="M12 4 q2 -8 0 -12 M22 2 q2 -8 0 -12 M32 4 q2 -8 0 -12" fill="none" stroke="#F3EAD3" stroke-width="2" opacity=".8" stroke-linecap="round"/></g>'}),
+  samson: portrait({id:'x', bg:'#5A2A1E', bg2:'#B0563A', skin:'#D9A277', robe:'#7A4A2E',
+    hair:'<path d="M46 80 q-8 -44 34 -44 q42 0 34 44 q-4 -18 -12 -22 q-6 8 -14 4 q-8 8 -16 2 q-8 10 -16 6 q-6 6 -10 10Z" fill="#2E1E14"/><path d="M46 80 q-6 30 0 52 h10 q-8 -22 -2 -52Z M114 80 q6 30 0 52 h-10 q8 -22 2 -52Z" fill="#2E1E14"/>',
+    beard:'#2E1E14',
+    robeDeco:'<path d="M28 160 q0 -46 52 -50 q52 4 52 50Z" fill="#D9A277"/><path d="M50 120 q30 -8 60 0 v40 h-60Z" fill="#7A4A2E"/>',
+    brow:'#2E1E14',
+    prop:'<rect x="4" y="60" width="16" height="100" fill="#C9BBA3"/><rect x="0" y="54" width="24" height="8" fill="#B49C7E"/><rect x="140" y="60" width="16" height="100" fill="#C9BBA3"/><rect x="136" y="54" width="24" height="8" fill="#B49C7E"/>'}),
+};
+
+// 状態 ---------------------------------------------------------
+let idx = 0, answers = [], result = null;
+const $ = id => document.getElementById(id);
+const show = id => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo({top:0}); };
+
+document.getElementById('faces').innerHTML = Object.entries(CH).map(([k,c])=>`<div>${P[k]}${c.name}</div>`).join('');
+function startQuiz(){ idx=0; answers=[]; show('s-quiz'); renderQ(); }
+function renderQ(){
+  const q = Q[idx];
+  $('bar').style.width = (idx/Q.length*100)+'%';
+  $('qnum').textContent = `質問 ${idx+1} / ${Q.length}`;
+  $('qtext').textContent = q.q;
+  $('opts').innerHTML = '';
+  q.o.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt' + (answers[idx]===i ? ' pick':'');
+    b.textContent = o[0];
+    b.onclick = ()=>{ answers[idx]=i; b.classList.add('pick'); setTimeout(nextQ,180); };
+    $('opts').appendChild(b);
+  });
+  $('back').style.visibility = idx===0 ? 'hidden':'visible';
+}
+function nextQ(){ if(idx < Q.length-1){ idx++; renderQ(); } else finish(); }
+function prevQ(){ if(idx>0){ idx--; renderQ(); } }
+
+function finish(){
+  const score = {}; Object.keys(CH).forEach(k=>score[k]=0);
+  answers.forEach((a,i)=> Q[i].o[a][1].forEach((k,n)=> score[k] += (n===0?2:1)));
+  const sorted = Object.entries(score).sort((a,b)=>b[1]-a[1]);
+  result = sorted[0][0];
+  const c = CH[result];
+  $('card').innerHTML = `
+    <div class="sym">${P[result]}</div>
+    <div class="who">聖書の人物</div>
+    <h2>${c.name}</h2>
+    <div class="title">${c.title}</div>
+    <div class="traits">${c.traits.map(t=>`<span>${t}</span>`).join('')}</div>
+    <p class="desc">${c.desc}</p>
+    <div class="verse"><div class="big">「${c.verse}」</div><small>${c.ref}（要約）</small></div>`;
+  const total = sorted.reduce((s,x)=>s+x[1],0)||1;
+  const second = CH[sorted[1][0]];
+  $('match').innerHTML = `一致度 <b>${Math.round(sorted[0][1]/total*100+45)}%</b> ／ 2番目に近いのは <b>${second.name}</b>（${second.title}）`;
+  $('bridge-title').textContent = `${c.name}が出会った神`;
+  $('bridge-text').textContent = c.bridge;
+  $('read-link').href = c.read;
+  $('read-ref').textContent = c.readref;
+  const text = shareText();
+  $('xlink').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text + '\n' + location.href);
+  $('bar').style.width='100%';
+  show('s-result');
+}
+function shareText(){
+  const c = CH[result];
+  return `私は聖書の【${c.name}】タイプでした！\n${c.title}：${c.traits.join('・')}\n#聖書人物診断 あなたはだれタイプ？`;
+}
+async function shareResult(){
+  const text = shareText();
+  if(navigator.share){
+    try{ await navigator.share({title:'聖書人物診断', text, url:location.href}); return; }catch(e){}
+  }
+  try{ await navigator.clipboard.writeText(text + '\n' + location.href); toast('結果をコピーしました'); }
+  catch(e){ toast('コピーできませんでした'); }
+}
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+function restart(){ show('s-start'); }
+</script>
+</body>
+</html>

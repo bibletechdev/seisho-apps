@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>エデンの園 ― エバのくだもの</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#A8DCD1; --sky-bottom:#FFE3B0;
+  --canopy:#6CC07A; --canopy-deep:#3F9A5A;
+  --ground:#9ED36F; --ground-deep:#78B850;
+  --gold:#FFC94A; --ink:#4A3426; --paper:#FFFDF6;
+  --danger:#C23B57; --title:#5A2E0E; --title-edge:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sky-top:#40507A; --sky-bottom:#E3A58C;
+    --canopy:#4E9A5E; --canopy-deep:#2F7445;
+    --ground:#6FA650; --ground-deep:#558A3C;
+    --ink:#F6EEDC; --paper:#2E3A33; --title:#FFE9B0; --title-edge:#3A1E0A;
+  }
+}
+:root[data-theme="dark"]{
+  --sky-top:#40507A; --sky-bottom:#E3A58C;
+  --canopy:#4E9A5E; --canopy-deep:#2F7445;
+  --ground:#6FA650; --ground-deep:#558A3C;
+  --ink:#F6EEDC; --paper:#2E3A33; --title:#FFE9B0; --title-edge:#3A1E0A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  background:var(--canopy-deep);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;
+  color:var(--ink);overflow:hidden;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{
+  position:relative;height:100%;max-width:520px;margin:0 auto;overflow:hidden;
+  background:linear-gradient(to bottom,var(--sky-top) 0%,var(--sky-bottom) 75%);
+}
+.cloud{position:absolute;background:#fff;opacity:.55;border-radius:999px;pointer-events:none}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud.c1{width:90px;height:28px;top:38%;left:-10px}
+.cloud.c1::before{width:40px;height:40px;left:16px;top:-20px}
+.cloud.c1::after{width:30px;height:30px;left:46px;top:-12px}
+.cloud.c2{width:70px;height:22px;top:52%;right:12px}
+.cloud.c2::before{width:32px;height:32px;left:12px;top:-16px}
+.cloud.c2::after{width:24px;height:24px;left:36px;top:-10px}
+
+.canopy{position:absolute;left:-8%;right:-8%;top:-4%;height:28%;pointer-events:none;z-index:1}
+.canopy svg{width:100%;height:100%;display:block}
+.ground{position:absolute;left:0;right:0;bottom:0;height:16%;z-index:1}
+.ground svg{width:100%;height:100%;display:block}
+.eve{
+  position:absolute;left:50%;bottom:4%;width:118px;height:128px;
+  transform:translateX(-50%);z-index:3;transition:transform .12s;
+  filter:drop-shadow(0 4px 3px rgba(0,0,0,.15));
+}
+.eve svg{width:100%;height:100%;display:block}
+.eve.chomp{transform:translateX(-50%) scale(1.08) rotate(-3deg)}
+.e-happy,.m-eat,.m-shock,.sweat{display:none}
+[data-face="eat"] .e-open{display:none}
+[data-face="eat"] .e-happy{display:inline}
+[data-face="eat"] .m-smile{display:none}
+[data-face="eat"] .m-eat{display:inline}
+[data-face="shock"] .m-smile{display:none}
+[data-face="shock"] .m-shock,[data-face="shock"] .sweat{display:inline}
+
+.hud{
+  position:absolute;top:10px;left:14px;right:14px;z-index:5;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  pointer-events:none;
+}
+.pill{
+  background:rgba(255,253,246,.92);color:#4A3426;border-radius:18px;
+  padding:6px 14px;box-shadow:0 3px 0 rgba(0,0,0,.08);text-align:center;
+}
+.pill .big{font-size:24px;font-weight:900;line-height:1.1}
+.pill .small{font-size:11px;font-weight:700;opacity:.7}
+.pill.low .big{color:var(--danger)}
+.combo{
+  position:absolute;top:72px;left:0;right:0;text-align:center;z-index:5;
+  font-weight:900;font-size:20px;color:#fff;
+  text-shadow:0 2px 0 #E89B2E,0 0 8px rgba(255,180,60,.6);
+  opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.combo.show{opacity:1}
+
+#field{position:absolute;inset:0;z-index:2}
+.fruit{
+  position:absolute;width:68px;height:68px;margin:-34px 0 0 -34px;
+  border:0;background:none;padding:0;cursor:pointer;touch-action:manipulation;
+}
+.fruit svg{width:100%;height:100%;display:block;pointer-events:none}
+.fruit.forbid1{filter:hue-rotate(40deg) saturate(1.6) brightness(1.15) drop-shadow(0 0 10px #FFE066)}
+.fruit.forbid2{filter:hue-rotate(12deg) drop-shadow(0 0 5px #FFF1A0)}
+.fruit .mark{
+  position:absolute;right:9px;top:14px;font-size:11px;color:#FFF7C0;
+  text-shadow:0 0 3px #C99A00;pointer-events:none;
+}
+.fruit.eaten{animation:eat .25s forwards;pointer-events:none}
+@keyframes eat{to{transform:scale(.2);opacity:0}}
+.pop{
+  position:absolute;z-index:6;font-weight:900;font-size:20px;color:#fff;
+  text-shadow:0 2px 0 #E89B2E;pointer-events:none;animation:pop .8s ease-out forwards;
+}
+@keyframes pop{to{transform:translateY(-40px);opacity:0}}
+
+.serpent{
+  position:absolute;top:13%;width:78px;height:118px;z-index:4;border:0;background:none;padding:0;
+  cursor:pointer;transform:translateY(-150%);transition:transform .45s cubic-bezier(.3,1.5,.6,1);
+}
+.serpent svg{width:100%;height:100%;display:block;pointer-events:none}
+.serpent.left{left:8%}.serpent.right{right:8%}
+.serpent.right svg{transform:scaleX(-1)}
+.serpent.in{transform:translateY(0)}
+.sgauge{
+  position:absolute;top:calc(13% + 120px);z-index:4;width:120px;
+  opacity:0;transition:opacity .2s;pointer-events:none;text-align:center;
+}
+.sgauge.show{opacity:1}
+.sgauge{width:136px!important;background:rgba(45,8,28,.88);border:2px solid #FFD54A;border-radius:14px;padding:6px 8px 8px;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.sgauge .stxt{color:#FFF27A;-webkit-text-stroke:0;text-shadow:none;font-size:22px;line-height:1.2}
+.sgauge .renda{-webkit-text-stroke:0;color:#FF8FA3;text-shadow:0 0 6px #FF3355;font-size:15px}
+.sgauge .strack{background:rgba(255,255,255,.25)}
+.sgauge.left{left:calc(8% - 20px)}.sgauge.right{right:calc(8% - 20px)}
+.stxt{font-weight:900;font-size:20px;color:#FFF27A;-webkit-text-stroke:1px #8A0020;text-shadow:0 2px 0 #8A0020;margin-bottom:3px}
+.renda{font-weight:900;font-size:17px;color:#fff;-webkit-text-stroke:1px #C2002F;text-shadow:0 0 8px #FF3355;animation:renda .35s ease-in-out infinite alternate;white-space:nowrap}
+@keyframes renda{from{transform:scale(1)}to{transform:scale(1.18)}}
+.sgauge.hurry .sbar{animation:blink .2s steps(2) infinite}
+@keyframes blink{50%{background:#FFE14A}}
+.strack{height:12px!important}
+.sbar{background:linear-gradient(90deg,#FF2F55,#FF9A3C)!important}
+.cutin{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;visibility:hidden}
+.cutin.show{visibility:visible}
+.cutin .rays{
+  position:absolute;left:50%;top:50%;width:260%;aspect-ratio:1;margin:-130% 0 0 -130%;
+  background:repeating-conic-gradient(rgba(255,40,70,.85) 0 7deg,rgba(255,200,60,.85) 7deg 14deg);
+  opacity:0;
+}
+.cutin.show .rays{animation:raysIn 1.3s ease-out forwards,spin 1.3s linear}
+@keyframes raysIn{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes spin{to{rotate:40deg}}
+.cutin .band{
+  position:absolute;left:-15%;right:-15%;top:33%;padding:16px 0 20px;
+  background:linear-gradient(#2A0012,#5A0024 50%,#2A0012);
+  border-top:5px solid #FFD54A;border-bottom:5px solid #FFD54A;
+  box-shadow:0 0 30px rgba(255,213,74,.8);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  transform:rotate(-7deg) translateX(120%);
+}
+.cutin.show .band{animation:bandIn 1.3s cubic-bezier(.2,1.2,.4,1) forwards}
+@keyframes bandIn{
+  0%{transform:rotate(-7deg) translateX(120%)}
+  18%{transform:rotate(-7deg) translateX(0)}
+  82%{transform:rotate(-7deg) translateX(0);opacity:1}
+  100%{transform:rotate(-7deg) translateX(-120%);opacity:1}
+}
+.cutin .cutsnake{
+  position:absolute;left:0;right:0;top:0;height:34%;
+  transform:translateY(-110%);filter:drop-shadow(0 0 14px rgba(255,60,90,.9));
+}
+.cutin .cutsnake svg{width:100%;height:100%;display:block}
+.cutin.show .cutsnake{animation:snakeDrop 1.3s cubic-bezier(.25,1.5,.5,1) forwards}
+@keyframes snakeDrop{
+  0%{transform:translateY(-110%)}
+  22%{transform:translateY(0)}
+  30%{transform:translateY(0) scale(1.08)}
+  38%{transform:translateY(0) scale(1)}
+  82%{transform:translateY(0);opacity:1}
+  100%{transform:translateY(-110%);opacity:0}
+}
+.cutin .t1{font-weight:900;font-size:18px;color:#fff;letter-spacing:.1em;margin-bottom:4px}
+.cutin .t2{
+  font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:clamp(36px,11vw,52px);line-height:1.1;
+  background:linear-gradient(#FFFBD0,#FFD200 45%,#FF7A00 55%,#FFE680);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:1.5px #3A0010;filter:drop-shadow(0 3px 0 #8A0020) drop-shadow(0 0 10px #FF3355);
+}
+.cutin.show .t2{animation:slam .35s .2s cubic-bezier(.3,1.6,.5,1) both,shakeT .1s .55s 6}
+@keyframes slam{from{transform:scale(3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes shakeT{25%{translate:-4px 2px}75%{translate:4px -2px}}
+#app.quake{animation:quake .3s}
+@keyframes quake{20%{translate:-8px 4px}40%{translate:7px -5px}60%{translate:-5px 3px}80%{translate:4px -2px}}
+#app.bump{animation:bump .12s}
+@keyframes bump{50%{translate:3px -3px}}
+.crushfx{position:absolute;inset:0;z-index:8;pointer-events:none;visibility:hidden;display:flex;align-items:center;justify-content:center}
+.crushfx.show{visibility:visible}
+.crushfx .burst{position:absolute;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,220,.95),rgba(255,210,60,.6) 35%,rgba(255,120,40,0) 70%);opacity:0}
+.crushfx.show .burst{animation:burst .9s ease-out forwards}
+@keyframes burst{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.crushfx .ct{
+  position:relative;font-weight:900;font-size:clamp(34px,10vw,46px);
+  background:linear-gradient(#FFFBD0,#FFD200 45%,#FF7A00 55%,#FFE680);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:1.5px #3A0010;filter:drop-shadow(0 3px 0 #8A0020);opacity:0;
+}
+.crushfx.show .ct{animation:ctIn 1s ease-out forwards}
+@keyframes ctIn{0%{transform:scale(2.5);opacity:0}20%{transform:scale(1);opacity:1}75%{opacity:1}100%{transform:scale(1.1);opacity:0}}
+.hitpop{color:#FFF27A!important;-webkit-text-stroke:1px #8A0020;font-size:26px!important;text-shadow:0 2px 0 #8A0020!important}
+.strack{height:10px;border-radius:99px;background:rgba(255,255,255,.7);overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.sbar{height:100%;width:100%;background:#FF7A8A;border-radius:99px}
+.serpent.hit{animation:shake .15s}
+@keyframes shake{25%{translate:-6px 0}75%{translate:6px 0}}
+.serpent.crushed svg{animation:crush .4s forwards}
+@keyframes crush{to{transform:scale(1.4,.2);opacity:0}}
+.bubble{
+  position:absolute;top:calc(13% + 56px);z-index:4;max-width:62%;
+  background:var(--paper);color:var(--ink);font-size:14px;font-weight:700;
+  padding:8px 14px;border-radius:16px;box-shadow:0 3px 0 rgba(0,0,0,.08);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.bubble.show{opacity:1}
+.bubble{max-width:48%!important}
+.bubble::after{content:"";position:absolute;top:14px;border:8px solid transparent}
+.bubble[data-side="left"]::after{left:-15px;border-right-color:var(--paper)}
+.bubble[data-side="right"]::after{right:-15px;border-left-color:var(--paper)}
+
+.screen{
+  position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+}
+.screen[hidden]{display:none}
+.title{
+  font-family:"Kaisei Decol","Hiragino Mincho ProN","Yu Mincho",serif;
+  font-size:clamp(36px,11vw,50px);line-height:1.25;margin:0 0 8px;font-weight:700;
+  color:var(--title);
+  -webkit-text-stroke:7px var(--title-edge);paint-order:stroke fill;
+  filter:drop-shadow(0 3px 0 rgba(0,0,0,.18));
+}
+.titleEve{width:96px;height:104px;margin:0 0 2px;filter:drop-shadow(0 4px 3px rgba(0,0,0,.15));animation:bob 2.4s ease-in-out infinite}
+.titleEve svg{width:100%;height:100%;display:block}
+@keyframes bob{50%{translate:0 -5px}}
+#start{padding-top:12px;padding-bottom:12px}
+#start .rules{margin-bottom:14px}
+#app:has(#start:not([hidden])) .eve{visibility:hidden}
+.sub{font-size:15px;margin:0 0 16px;font-weight:900;color:var(--title);text-shadow:0 0 4px var(--title-edge),0 0 4px var(--title-edge),0 0 8px var(--title-edge)}
+.rules{
+  background:var(--paper);border-radius:22px;padding:14px 18px;margin:0 0 20px;
+  font-size:14px;line-height:1.5;text-align:left;max-width:320px;width:100%;
+  box-shadow:0 4px 0 rgba(0,0,0,.08);
+}
+.rules p{margin:0;display:flex;align-items:center;gap:8px;min-height:34px}
+.ico{width:32px;height:32px;flex:none;display:inline-block}
+.ico svg{width:100%;height:100%;display:block}
+.caution{margin-top:12px;padding-top:10px;border-top:2px dashed rgba(194,59,87,.35)}
+.chead{color:var(--danger);font-weight:900;font-size:15px;margin-bottom:4px}
+.rules .warn{color:var(--danger);font-weight:900;line-height:1.6}
+.rules .warn.gap{margin-top:14px}
+.rules .warn{align-items:flex-start}
+.rules .warn .ico{margin-top:2px}
+.lines{display:flex;flex-direction:column}
+.lines>span{display:block}
+.lines>.sp{margin-top:10px}
+.btn{
+  font-family:inherit;font-size:20px;font-weight:900;color:#5A3A08;
+  background:var(--gold);border:0;border-radius:999px;padding:14px 42px;
+  box-shadow:0 5px 0 #D9962A;cursor:pointer;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #D9962A}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.best{margin-top:14px;font-size:14px;font-weight:700}
+
+#over{background:rgba(28,22,40,0);transition:background 1.2s;color:#FFF3DE}
+#over.dark{background:rgba(28,22,40,.86)}
+#over .msg{font-family:"Kaisei Decol",serif;font-size:24px;line-height:1.5;margin:0 0 8px;opacity:0;transition:opacity 1s .6s}
+#over.dark .msg,#over.dark .after{opacity:1}
+#over .after{opacity:0;transition:opacity 1s 1.4s;display:flex;flex-direction:column;align-items:center}
+.leafeve{width:150px;height:170px;margin:0 0 6px}
+.leafeve svg{width:100%;height:100%}
+.verse{font-family:"Kaisei Decol",serif;font-size:15px;margin:0 0 16px;line-height:1.8;max-width:300px}
+#clear .verse{background:var(--paper);border-radius:20px;padding:14px 16px;box-shadow:0 4px 0 rgba(0,0,0,.08);max-width:330px}
+.verse .ref{display:block;font-size:12px;opacity:.75;margin-top:4px}
+.final{font-size:24px;font-weight:900;margin:0 0 4px}
+#clear .final{font-size:42px;color:var(--title);-webkit-text-stroke:6px var(--title-edge);paint-order:stroke fill}
+.bonus{margin:0 0 2px;font-size:14px;font-weight:900;color:#E08A1E;-webkit-text-stroke:4px #fff;paint-order:stroke fill}
+.newbest{color:var(--gold);font-weight:900;margin-bottom:14px}
+#clear .bonus{margin:0 0 2px;font-size:14px;font-weight:900;color:#E08A1E;-webkit-text-stroke:4px #fff;paint-order:stroke fill}
+.newbest{color:#E08A1E}
+
+.bigsnake{
+  position:absolute;inset:0;z-index:9;overflow:hidden;
+  background:radial-gradient(circle at 50% 60%,rgba(120,40,110,.55),rgba(30,15,40,.9));
+  opacity:0;transition:opacity .4s;
+}
+.bigsnake.show{opacity:1}
+.bigart{
+  position:absolute;left:0;right:0;top:0;height:66%;
+  transform:translateY(-100%) scale(.6);transform-origin:50% 0;
+  transition:transform .9s cubic-bezier(.25,1.4,.5,1);
+}
+.bigsnake.show .bigart{transform:translateY(0) scale(1);animation:sway 1.6s ease-in-out .9s infinite}
+@keyframes sway{50%{rotate:3deg}}
+.bigart svg{width:100%;height:100%;display:block}
+.bigwhisper{
+  position:absolute;left:20px;right:20px;top:70%;
+  text-align:center;font-family:"Kaisei Decol",serif;font-size:22px;font-weight:700;line-height:1.5;color:#FFE9F2;
+  background:rgba(40,12,45,.75);border:2px solid rgba(255,170,220,.4);border-radius:20px;padding:14px 16px;
+  text-shadow:0 0 10px #C23B8A;
+  opacity:0;transition:opacity .6s .8s;
+}
+.bigsnake.show .bigwhisper{opacity:1}
+.revive{position:absolute;inset:0;z-index:11;overflow:hidden;background:rgba(5,5,12,0);transition:background .8s}
+.revive.s1{background:rgba(5,5,12,.95)}
+.rv-light{position:absolute;inset:0;opacity:0;transition:opacity 1.4s;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,#FFFDF0 0%,#FFE9A8 30%,#F6C86A 55%,rgba(60,40,80,.9) 100%)}
+.rv-beams{position:absolute;left:50%;top:0;width:220%;aspect-ratio:1;margin-left:-110%;margin-top:-110%;
+  background:repeating-conic-gradient(rgba(255,255,255,.35) 0 4deg,rgba(255,255,255,0) 4deg 12deg);
+  opacity:0;transition:opacity 1.4s}
+.revive.s2 .rv-light{opacity:1}
+.revive.s2 .rv-beams{opacity:1;animation:spin 20s linear infinite}
+.rv-jesus{position:absolute;left:50%;top:calc(2% + env(safe-area-inset-top,0px));width:170px;height:187px;margin-left:-85px;
+  transform:translateY(-120%);opacity:0;transition:transform 2s cubic-bezier(.2,.8,.3,1),opacity 1.5s;
+  filter:drop-shadow(0 0 18px rgba(255,240,180,.95))}
+.revive.s2 .rv-jesus{transform:translateY(0);opacity:1;animation:float 3s ease-in-out 2s infinite}
+@keyframes float{50%{translate:0 -6px}}
+.rv-jesus svg{width:100%;height:100%;display:block}
+.rv-body{position:absolute;left:16px;right:16px;top:calc(2% + 190px + env(safe-area-inset-top,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;text-align:center}
+.rv-t1{font-family:"Kaisei Decol",serif;font-size:22px;font-weight:700;color:#5A3A08;margin:0 0 10px;
+  text-shadow:0 0 10px #fff;opacity:0;transition:opacity 1s}
+.revive.s3 .rv-t1{opacity:1}
+.rv-card{background:rgba(255,253,246,.94);border:2px solid #F2C94C;border-radius:20px;padding:12px 16px;max-width:340px;width:100%;
+  box-shadow:0 0 24px rgba(255,220,120,.7);color:#4A3426;opacity:0;transform:translateY(10px);transition:opacity 1s,transform 1s}
+.revive.s4 .rv-card{opacity:1;transform:none}
+.rv-head{font-weight:900;font-size:15px;color:#B07A10;margin-bottom:6px}
+.rv-verse{font-family:"Kaisei Decol",serif;font-size:15px;line-height:1.75;margin:0}
+.rv-ref{font-size:11px;opacity:.7;margin:4px 0 8px}
+.rv-note{font-size:13px;font-weight:700;line-height:1.6;margin:0;padding-top:8px;border-top:1px dashed #E6C98A}
+.rv-auto{margin:14px 0 0;font-family:"Kaisei Decol",serif;font-size:20px;font-weight:700;color:#7A4A00;background:rgba(255,253,246,.96);border:2px solid #F2C94C;border-radius:999px;padding:8px 22px;box-shadow:0 0 18px rgba(255,220,120,.8);opacity:0;transition:opacity .8s}
+.revive.s5 .rv-auto{opacity:1;animation:renda .6s ease-in-out infinite alternate}
+.revive{pointer-events:auto}
+.btn2{font-family:inherit;font-size:15px;font-weight:900;color:#5A3A08;background:var(--paper);border:3px solid var(--gold);
+  border-radius:999px;padding:9px 22px;margin-top:12px;cursor:pointer;box-shadow:0 3px 0 #D9962A}
+:root[data-theme="dark"] .btn2{color:#FFE9B0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn2{color:#FFE9B0}}
+.btn2:active{transform:translateY(2px);box-shadow:0 1px 0 #D9962A}
+.btns{display:flex;flex-direction:column;align-items:center}
+.rmodal{position:absolute;inset:0;z-index:28;background:rgba(20,14,30,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.rmodal[hidden]{display:none}
+.rcard{background:#FFFDF6;color:#4A3426;width:100%;max-width:360px;max-height:90%;display:flex;flex-direction:column;
+  border-radius:24px;border:3px solid #F2C94C;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.rhead{font-family:"Kaisei Decol",serif;font-size:24px;font-weight:700;text-align:center;color:#8A5A00}
+.rmode{text-align:center;font-size:12px;font-weight:700;opacity:.7;margin:2px 0 8px}
+.rentry{background:#FFF4D0;border-radius:16px;padding:10px;margin-bottom:8px}
+.rentry[hidden]{display:none}
+.rscore{text-align:center;font-weight:900;font-size:22px;margin-bottom:6px}
+.rform{display:flex;gap:6px}
+.rform input{flex:1;min-width:0;font-family:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:2px solid #E6C98A;background:#fff;color:#4A3426;
+  -webkit-user-select:text;user-select:text}
+.rsend{font-family:inherit;font-size:16px;font-weight:900;border:0;border-radius:12px;padding:0 16px;background:var(--gold);color:#5A3A08;cursor:pointer}
+.rsend:disabled{opacity:.5}
+.rmsg{text-align:center;font-size:14px;font-weight:900;color:#C2571E;min-height:1.2em;margin-bottom:4px}
+.rlist{list-style:none;margin:0 0 4px;padding:0;overflow-y:auto;flex:1;min-height:120px}
+.rlist li{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px dashed #EAD9B0;font-weight:700}
+.rlist li.me{background:#FFE9A8;border-radius:10px}
+.rlist .rk{width:34px;text-align:center;font-weight:900}
+.rlist .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rlist .sc{font-weight:900}
+.rlist .empty{justify-content:center;opacity:.6;border:0}
+.rcard .btn2{align-self:center}
+.bcut{position:absolute;inset:0;z-index:11;overflow:hidden;background:radial-gradient(circle at 50% 40%,#FFF8D8,#FFC94A 45%,#E0662A 100%)}
+.b-rays{position:absolute;left:50%;top:40%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;
+  background:repeating-conic-gradient(rgba(255,255,255,.6) 0 6deg,rgba(255,255,255,0) 6deg 12deg,rgba(255,150,200,.35) 12deg 18deg,rgba(255,255,255,0) 18deg 24deg);
+  animation:spin 8s linear infinite}
+.b-wrap{position:absolute;left:14px;right:14px;top:calc(4% + env(safe-area-inset-top,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.b-band{width:calc(100% + 60px);padding:12px 0 16px;background:linear-gradient(#5A0024,#8A0A3A 50%,#5A0024);
+  border-top:5px solid #FFE14A;border-bottom:5px solid #FFE14A;box-shadow:0 0 30px rgba(255,225,74,.9);
+  transform:rotate(-5deg) translateX(130%)}
+.bcut.show .b-band{animation:bBand .5s cubic-bezier(.2,1.3,.4,1) forwards}
+@keyframes bBand{to{transform:rotate(-5deg) translateX(0)}}
+.b-t1{font-weight:900;font-size:18px;color:#fff;letter-spacing:.08em}
+.b-t2{font-weight:900;font-size:clamp(38px,11vw,54px);line-height:1.1;
+  background:linear-gradient(100deg,#FFF6C8 0%,#FFD24A 30%,#FFFFFF 45%,#FFB300 60%,#FFF1A8 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.5px #3A0010;
+  filter:drop-shadow(0 3px 0 #8A0020) drop-shadow(0 0 10px #FF3355)}
+.bcut.show .b-t2{animation:slam .35s .35s cubic-bezier(.3,1.6,.5,1) both,shine 1.2s .8s linear infinite}
+.b-card{background:rgba(255,253,246,.96);border:3px solid #F2C94C;border-radius:20px;padding:12px 16px;max-width:340px;
+  box-shadow:0 0 24px rgba(255,255,255,.9);color:#4A3426;opacity:0;transform:translateY(14px)}
+.bcut.show .b-card{animation:cardIn .7s .9s forwards}
+@keyframes cardIn{to{opacity:1;transform:none}}
+.b-head{font-weight:900;font-size:15px;color:#B07A10;margin-bottom:6px}
+.b-verse{font-family:"Kaisei Decol",serif;font-size:15px;line-height:1.75;margin:0;text-align:left}
+.b-ref{font-size:11px;opacity:.7;margin-top:4px}
+.b-info{font-weight:900;font-size:20px;line-height:1.4;color:#fff;-webkit-text-stroke:5px #8A0A3A;paint-order:stroke fill;opacity:0}
+.b-info b{font-size:30px;color:#FFF27A}
+.bcut.show .b-info{animation:cardIn .5s 2.2s forwards,renda .5s 2.7s ease-in-out infinite alternate}
+.pill.bonus{background:linear-gradient(#FFF6C8,#FFD54A)!important;box-shadow:0 0 14px rgba(255,200,60,.9)}
+.stomp{position:absolute;inset:0;z-index:11;overflow:hidden}
+.st-bg{position:absolute;inset:0;background:radial-gradient(ellipse 90% 70% at 50% 45%,#3A2350 0%,#140A1E 100%);transition:background .2s}
+.st-bg::after{content:"";position:absolute;inset:0;opacity:0;transition:opacity .25s;
+  background:radial-gradient(ellipse 90% 70% at 50% 42%,#FFFBE0 0%,#FFD45A 35%,#C2711E 75%,#3A1A10 100%)}
+.stomp.hit .st-bg::after{opacity:1}
+.st-rays{position:absolute;left:50%;top:calc(20% + 218px);width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;
+  background:repeating-conic-gradient(rgba(255,255,255,.55) 0 5deg,rgba(255,255,255,0) 5deg 15deg);opacity:0}
+.stomp.hit .st-rays{opacity:1;transition:opacity .2s;animation:spin 6s linear infinite}
+.st-beam{position:absolute;left:50%;top:0;width:110px;margin-left:-55px;height:calc(20% + 240px);
+  background:linear-gradient(to bottom,rgba(255,255,255,.95),rgba(255,236,160,.85) 70%,rgba(255,220,120,0));
+  box-shadow:0 0 40px 20px rgba(255,230,150,.55);border-radius:0 0 50% 50%;
+  transform:scaleX(0);transform-origin:50% 0;opacity:0}
+.stomp.show .st-beam{animation:beamIn .5s .25s cubic-bezier(.2,1.4,.5,1) forwards,beamFlicker .12s .8s steps(2) infinite}
+@keyframes beamIn{from{transform:scaleX(0) scaleY(.3);opacity:0}to{transform:scaleX(1) scaleY(1);opacity:1}}
+@keyframes beamFlicker{50%{opacity:.85}}
+.stomp.hit .st-beam{animation:beamOut .5s forwards}
+@keyframes beamOut{from{transform:scaleX(1.6);opacity:1}to{transform:scaleX(3);opacity:0}}
+.st-stage{position:absolute;left:50%;top:20%;width:200px;height:280px;margin-left:-100px}
+.stomp.hit .st-stage{animation:punch .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes punch{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.st-shadow{position:absolute;left:30px;right:30px;top:224px;height:22px;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(4px)}
+.st-snake{position:absolute;left:40px;top:80px;width:120px;height:180px;transform-origin:50% 77%}
+.stomp.show .st-snake{animation:hiss .12s steps(2) infinite}
+@keyframes hiss{50%{translate:2px 0}}
+.stomp.hit .st-snake{animation:shatter .7s forwards}
+@keyframes shatter{0%{transform:scale(1)}15%{transform:scale(1.6,.22)}100%{transform:scale(1.9,.12);opacity:0;filter:blur(6px) brightness(2)}}
+.st-snake svg,.st-foot svg{width:100%;height:100%;display:block}
+.st-crack{position:absolute;left:0;top:200px;width:200px;height:60px;overflow:visible;filter:drop-shadow(0 0 4px #FFD54A) drop-shadow(0 0 10px #FF9A3C)}
+.st-crack path{fill:none;stroke:#FFF3B0;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120}
+.stomp.hit .st-crack path{animation:crack .35s ease-out forwards}
+@keyframes crack{to{stroke-dashoffset:0}}
+.st-foot{position:absolute;left:40px;top:93px;width:120px;height:160px;opacity:0;
+  filter:drop-shadow(0 0 14px #fff) drop-shadow(0 0 30px rgba(255,220,120,.95))}
+.stomp.show .st-foot{animation:footSeq 1.3s .5s forwards}
+@keyframes footSeq{
+  0%{transform:translateY(-170%) scale(1.6);opacity:0}
+  40%{transform:translateY(-38%) scale(1.18);opacity:1}
+  70%{transform:translateY(-32%) scale(1.2);opacity:1;animation-timing-function:cubic-bezier(.8,0,1,.6)}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+.stomp.hit .st-foot{opacity:1;animation:press .5s forwards}
+@keyframes press{0%{transform:translateY(4px) scale(1.06,.92)}100%{transform:none}}
+.st-ring{position:absolute;left:100px;top:218px;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;
+  border:6px solid #FFF6C8;box-shadow:0 0 16px #FFD54A,inset 0 0 12px #FFD54A;opacity:0}
+.stomp.hit .st-ring{animation:ring2 .8s ease-out forwards}
+.stomp.hit .st-ring.r2{animation-delay:.12s}
+.stomp.hit .st-ring.r3{animation-delay:.24s}
+@keyframes ring2{0%{transform:scale(.3) scaleY(.5);opacity:1}100%{transform:scale(7) scaleY(.5);opacity:0}}
+.st-parts{position:absolute;left:100px;top:218px}
+.st-p{position:absolute;left:0;top:0;width:var(--s);height:var(--s);margin:calc(var(--s) / -2);border-radius:50%;
+  background:#FFF6C8;box-shadow:0 0 10px #FFD54A,0 0 4px #fff;opacity:0}
+.stomp.hit .st-p{animation:fly var(--t) cubic-bezier(.1,.8,.3,1) forwards}
+@keyframes fly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.st-pre{position:absolute;left:12px;right:12px;top:calc(20% + 300px);text-align:center;
+  font-family:"Kaisei Decol",serif;font-size:20px;font-weight:700;line-height:1.6;color:#FFE9B0;
+  text-shadow:0 0 12px rgba(255,210,120,.8);opacity:0}
+.stomp.show .st-pre{animation:preIn 1.3s .3s forwards}
+@keyframes preIn{0%{opacity:0;transform:translateY(8px)}40%{opacity:1;transform:none}100%{opacity:1}}
+.stomp.hit .st-pre{animation:none;opacity:0;transition:opacity .1s}
+.st-text{position:absolute;left:8px;right:8px;top:calc(20% + 290px);text-align:center;font-weight:900;line-height:1.12}
+.st-text span{display:block;font-size:clamp(32px,10vw,48px);
+  background:linear-gradient(100deg,#FFF6C8 0%,#FFD24A 30%,#FFFFFF 45%,#FFB300 60%,#FFF1A8 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.5px #4A1A00;
+  filter:drop-shadow(0 3px 0 #7A2E00) drop-shadow(0 0 14px rgba(255,200,60,.9));opacity:0}
+.stomp.hit .st-text span{animation:slam .35s .15s cubic-bezier(.3,1.6,.5,1) both,shine 1.2s .5s linear infinite}
+.stomp.hit .st-text span:nth-child(2){animation-delay:.3s,.65s}
+@keyframes shine{from{background-position:100% 0}to{background-position:-160% 0}}
+.st-white{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.stomp.hit .st-white{animation:whiteHit .55s ease-out}
+@keyframes whiteHit{0%{opacity:1}100%{opacity:0}}
+.fullflash{position:absolute;inset:0;z-index:12;background:#FFFBE6;opacity:0;pointer-events:none}
+.fullflash.go{animation:flash 1s}
+.mute{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:26;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,253,246,.9);font-size:20px;box-shadow:0 3px 0 rgba(0,0,0,.12);cursor:pointer}
+.dbg-toggle{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));left:50%;margin-left:-20px;width:40px;height:40px;z-index:31;
+  border:0;border-radius:50%;background:rgba(20,20,30,.85);color:#fff;font-size:18px;cursor:pointer}
+.dbg{position:absolute;left:0;right:0;bottom:0;max-height:58%;overflow-y:auto;z-index:30;
+  background:rgba(18,18,28,.94);color:#fff;font-size:12px;padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));
+  border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.4)}
+.dbg-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:4px}
+.dbg-head button{margin-left:6px}
+.dbg button{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:#3A3A52;border:1px solid #55557A;border-radius:8px;padding:8px 4px;cursor:pointer}
+.dbg button:active{background:#5A5A80}
+.dbg button.on{background:#C23B57;border-color:#FF7A8A}
+.dbg-status{white-space:pre-line;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#9FE0B0;margin-bottom:4px;line-height:1.5}
+.dbg-sec{margin:8px 0 4px;color:#FFD54A;font-weight:900}
+.dbg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.flash{position:absolute;inset:0;z-index:9;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:flash .5s}
+@keyframes flash{30%{opacity:.9}to{opacity:0}}
+@media (prefers-reduced-motion: reduce){.pop{animation-duration:.01s}.serpent{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="cloud c1"></div><div class="cloud c2"></div>
+  <div class="canopy" aria-hidden="true">
+    <svg viewBox="0 0 400 130" preserveAspectRatio="none">
+      <rect x="0" y="0" width="400" height="60" fill="var(--canopy-deep)"/>
+      <g fill="var(--canopy-deep)">
+        <circle cx="0" cy="72" r="34"/><circle cx="52" cy="80" r="34"/><circle cx="104" cy="74" r="34"/><circle cx="156" cy="82" r="34"/><circle cx="208" cy="74" r="34"/><circle cx="260" cy="82" r="34"/><circle cx="312" cy="74" r="34"/><circle cx="364" cy="80" r="34"/><circle cx="410" cy="72" r="34"/>
+      </g>
+      <rect x="0" y="0" width="400" height="44" fill="var(--canopy)"/>
+      <g fill="var(--canopy)">
+        <circle cx="24" cy="54" r="27"/><circle cx="76" cy="60" r="27"/><circle cx="128" cy="54" r="27"/><circle cx="180" cy="62" r="27"/><circle cx="232" cy="54" r="27"/><circle cx="284" cy="60" r="27"/><circle cx="336" cy="54" r="27"/><circle cx="388" cy="60" r="27"/>
+      </g>
+      <g fill="#fff" opacity=".25">
+        <ellipse cx="70" cy="44" rx="14" ry="5"/><ellipse cx="226" cy="40" rx="14" ry="5"/><ellipse cx="330" cy="42" rx="12" ry="4"/>
+      </g>
+      <g>
+        <circle cx="40" cy="92" r="6" fill="#FF6B6B"/><circle cx="146" cy="100" r="6" fill="#FF6B6B"/><circle cx="250" cy="98" r="6" fill="#FF6B6B"/><circle cx="352" cy="94" r="6" fill="#FF6B6B"/>
+        <g fill="#FFB8C8"><circle cx="100" cy="30" r="4"/><circle cx="196" cy="24" r="4"/><circle cx="300" cy="28" r="4"/><circle cx="20" cy="22" r="4"/><circle cx="380" cy="20" r="4"/></g>
+        <g fill="#FFF3A0"><circle cx="100" cy="30" r="1.6"/><circle cx="196" cy="24" r="1.6"/><circle cx="300" cy="28" r="1.6"/><circle cx="20" cy="22" r="1.6"/><circle cx="380" cy="20" r="1.6"/></g>
+      </g>
+    </svg>
+  </div>
+  <div class="ground" aria-hidden="true">
+    <svg viewBox="0 0 400 120" preserveAspectRatio="none">
+      <path d="M0 30Q100 0 200 18T400 22V120H0Z" fill="var(--ground)"/>
+      <path d="M0 70Q120 50 220 64T400 60V120H0Z" fill="var(--ground-deep)"/>
+      <g fill="#fff"><circle cx="40" cy="40" r="5"/><circle cx="330" cy="38" r="5"/><circle cx="90" cy="84" r="4"/><circle cx="360" cy="86" r="4"/></g>
+      <g fill="#FFD84A"><circle cx="40" cy="40" r="2"/><circle cx="330" cy="38" r="2"/><circle cx="90" cy="84" r="1.6"/><circle cx="360" cy="86" r="1.6"/></g>
+      <g fill="#FF9AB5"><circle cx="276" cy="58" r="4.5"/><circle cx="120" cy="34" r="4"/></g>
+    </svg>
+  </div>
+  <div class="eve" id="eve" data-face="smile" aria-hidden="true"></div>
+
+  <div class="hud" id="hud" hidden>
+    <div class="pill"><div class="big" id="score">0</div><div class="small" id="stageLbl">ステージ1</div></div>
+    <div class="pill" id="timePill"><div class="big" id="time">45</div><div class="small">びょう</div></div>
+  </div>
+  <div class="combo" id="combo"></div>
+  <div id="field"></div>
+  <button class="serpent left" id="serpent" aria-label="ヘビを追い払う" hidden></button>
+  <div class="sgauge" id="sgauge"><div class="renda">👆連打！連打！</div><div class="stxt" id="shits"></div><div class="strack"><div class="sbar" id="sbar"></div></div></div>
+  <div class="bubble" id="bubble">食べてもいいんだよ…</div>
+  <div class="flash" id="flash"></div>
+  <div class="fullflash" id="fullflash"></div>
+  <div class="cutin" id="cutin" aria-hidden="true">
+    <div class="rays"></div>
+    <div class="cutsnake" id="cutSnake"></div>
+    <div class="band"><div class="t1">⚡ ヘビ出現 ⚡</div><div class="t2">連打で<br>打ち砕け！！</div></div>
+  </div>
+  <div class="crushfx" id="crushfx" aria-hidden="true"><div class="burst"></div><div class="ct" id="ct">打ち砕いた！！</div></div>
+  <div class="bigsnake" id="bigsnake" hidden aria-hidden="true">
+    <div class="bigart" id="bigSnakeArt"></div>
+    <div class="bigwhisper" id="bigWhisper"></div>
+  </div>
+
+  <button class="mute" id="muteBtn" aria-label="音のオン・オフ">🔊</button>
+  <button class="dbg-toggle" id="dbgToggle" hidden>🛠</button>
+  <div class="dbg" id="dbg" hidden>
+    <div class="dbg-head"><b>🛠 デバッグモード</b><span><button data-d="min">ー</button><button data-d="off">終了</button></span></div>
+    <div class="dbg-status" id="dbgStatus"></div>
+    <div class="dbg-sec">ゲーム</div>
+    <div class="dbg-grid">
+      <button data-d="start">ゲーム開始</button>
+      <button data-d="pause" id="dbgPause">一時停止</button>
+      <button data-d="inv" id="dbgInv">無敵：OFF</button>
+      <button data-d="st1">ステージ1</button><button data-d="st2">ステージ2</button><button data-d="st3">ステージ3</button>
+      <button data-d="t30">残り＋30秒</button><button data-d="t5">残り5秒</button><button data-d="combo">コンボ＋5</button>
+    </div>
+    <div class="dbg-sec">くだものを出す</div>
+    <div class="dbg-grid">
+      <button data-d="f:apple">りんご</button><button data-d="f:grape">ぶどう</button><button data-d="f:fig">いちじく</button>
+      <button data-d="f:life">いのちの実</button><button data-d="f:forbid">禁断の実</button><button data-d="f:clear">全部消す</button>
+    </div>
+    <div class="dbg-sec">ヘビ</div>
+    <div class="dbg-grid">
+      <button data-d="snake">ヘビ出現</button><button data-d="crushNow">ヘビ撃破</button><button data-d="snakeLose">ヘビ時間切れ</button>
+    </div>
+    <div class="dbg-sec">演出だけ確認</div>
+    <div class="dbg-grid">
+      <button data-d="fx:cutin">カットイン</button><button data-d="fx:crush">打ち砕いた！！</button><button data-d="fx:fukkatsu">復活！！</button>
+      <button data-d="fx:quake">画面ゆれ</button><button data-d="fx:flash">白フラッシュ</button><button data-d="fx:big">巨大ヘビ</button>
+    </div>
+    <div class="dbg-sec">ゲームオーバー・クリア</div>
+    <div class="dbg-grid">
+      <button data-d="go:forbid">禁断の実で終了</button><button data-d="go:snake">ヘビで終了</button><button data-d="go:revive">ヘビ→復活</button>
+      <button data-d="revive">復活演出だけ</button><button data-d="stompfx">足で踏み砕く</button><button data-d="clear">クリア画面</button><button data-d="bonus">祝福タイム</button><button data-d="title">タイトルへ</button>
+    </div>
+    <div class="dbg-sec">設定</div>
+    <div class="dbg-grid">
+      <button data-d="rv" id="dbgRv">復活：通常(1回まで)</button><button data-d="rvreset">復活回数リセット</button><button data-d="best">ハイスコア消去</button>
+    </div>
+  </div>
+
+  <section class="screen" id="start">
+    <div class="titleEve" id="titleEve" data-face="smile" aria-hidden="true"></div>
+    <h1 class="title">エデンの園</h1>
+    <p class="sub">エバになって、園のくだものを食べよう</p>
+    <div class="rules">
+      <p><span class="ico" data-ico="apple"></span>りんご　10点</p>
+      <p><span class="ico" data-ico="grape"></span>ぶどう　15点</p>
+      <p><span class="ico" data-ico="fig"></span>いちじく　20点</p>
+      <p><span class="ico" data-ico="life"></span>いのちの木の実　50点＋5秒</p>
+      <div class="caution">
+        <div class="chead">⚠ 注意</div>
+        <p class="warn"><span class="ico" data-ico="forbid"></span><span class="lines"><span>ニヤッと笑う実は善悪の知識の実。</span><span>食べたらおしまい！</span></span></p>
+        <p class="warn gap"><span class="ico" data-ico="snake"></span><span class="lines"><span>ヘビが出たら連打で打ち砕こう！</span><span class="sp">まにあわないと、</span><span>誘惑されてゲームオーバー</span></span></p>
+      </div>
+    </div>
+    <button class="btn" id="startBtn">はじめる</button>
+    <button class="btn2" id="rankOpen0">🏆 ランキング</button>
+    <div class="best" id="bestStart"></div>
+  </section>
+
+  <div class="rmodal" id="rankModal" hidden>
+    <div class="rcard" role="dialog" aria-label="ランキング">
+      <div class="rhead">🏆 ランキング</div>
+      <div class="rmode" id="rankMode"></div>
+      <div class="rentry" id="rankEntry">
+        <div class="rscore" id="rankScore"></div>
+        <div class="rform"><input id="rankName" maxlength="10" placeholder="なまえ（10文字まで）" autocomplete="nickname"><button class="rsend" id="rankSend">登録</button></div>
+      </div>
+      <div class="rmsg" id="rankMsg"></div>
+      <ol class="rlist" id="rankList"></ol>
+      <button class="btn2" id="rankClose">とじる</button>
+    </div>
+  </div>
+  <div class="bcut" id="bonusCut" hidden aria-hidden="true">
+    <div class="b-rays"></div>
+    <div class="b-wrap">
+      <div class="b-band"><div class="b-t1">✨ ゲームクリア ✨</div><div class="b-t2">祝福タイム<br>突入！！</div></div>
+      <div class="b-card">
+        <div class="b-head">ルカによる福音書 6章38節</div>
+        <p class="b-verse">「与えよ。そうすれば、自分にも与えられるであろう。人々はおし入れ、ゆすり入れ、あふれ出るまでに量をよくして、あなたがたのふところに入れてくれるであろう」</p>
+        <div class="b-ref">（口語訳）</div>
+      </div>
+      <div class="b-info">10秒間、くだものが<br><b>10倍</b>ふってくる！</div>
+    </div>
+  </div>
+  <div class="stomp" id="stomp" hidden aria-hidden="true">
+    <div class="st-bg"></div>
+    <div class="st-rays"></div>
+    <div class="st-beam"></div>
+    <div class="st-stage">
+      <div class="st-shadow"></div>
+      <svg class="st-crack" viewBox="0 0 200 60"><g>
+        <path d="M100 18L72 28L52 24L28 38"/><path d="M100 18L128 30L150 26L176 42"/>
+        <path d="M100 18L90 38L98 56"/><path d="M100 18L113 40L106 58"/>
+        <path d="M100 18L62 12L34 8"/><path d="M100 18L140 10L168 14"/></g></svg>
+      <div class="st-snake" id="stSnake"></div>
+      <div class="st-ring r1"></div><div class="st-ring r2"></div><div class="st-ring r3"></div>
+      <div class="st-parts" id="stParts"></div>
+      <div class="st-foot" id="stFoot"></div>
+    </div>
+    <div class="st-pre">約束の救い主が<br>ヘビのかしらを砕く</div>
+    <div class="st-text"><span>かしらを</span><span>踏み砕いた！！</span></div>
+    <div class="st-white"></div>
+  </div>
+  <div class="revive" id="revive" hidden>
+    <div class="rv-light"></div>
+    <div class="rv-beams"></div>
+    <div class="rv-jesus" id="rvJesus" aria-hidden="true"></div>
+    <div class="rv-body">
+      <p class="rv-t1">イエス・キリストが来られた</p>
+      <div class="rv-card">
+        <div class="rv-head">創世記3章15節の約束</div>
+        <p class="rv-verse">「わたしは、おまえと女との間に、<br>また、おまえの子孫と<br>女の子孫との間に、敵意を置く。<br>彼は、おまえの頭を踏み砕き、<br>おまえは、彼のかかとにかみつく。」</p>
+        <div class="rv-ref">創世記 3章15節（新改訳2017）</div>
+        <p class="rv-note">約束された「女の子孫」イエス・キリストが、<br>ヘビの頭を踏み砕いてくださった</p>
+      </div>
+      <p class="rv-auto" id="rvAuto">いのちがよみがえる…</p>
+    </div>
+  </div>
+
+  <section class="screen" id="over" hidden>
+    <p class="msg" id="overMsg">善悪の知識の実を<br>食べてしまった…</p>
+    <div class="after">
+      <div class="leafeve" id="leafEve" data-face="shock" aria-hidden="true"></div>
+      <p class="verse" id="verse"></p>
+      <p class="final" id="overScore"></p>
+      <div class="newbest" id="overBest"></div>
+      <div id="overBtns" class="btns"><button class="btn" id="retry1">もう一度エデンへ</button><button class="btn2" id="rankOpen1">🏆 ランキングに登録</button></div>
+    </div>
+  </section>
+
+  <section class="screen" id="clear" hidden>
+    <h2 class="title">日が暮れました</h2>
+    <p class="sub">禁断の実を食べずに過ごせました</p>
+    <p class="verse" id="clearVerse"></p>
+    <p class="bonus" id="clearBonus"></p>
+    <p class="final" id="clearScore"></p>
+    <div class="newbest" id="clearBest"></div>
+    <div class="btns"><button class="btn" id="retry2">もう一度あそぶ</button><button class="btn2" id="rankOpen2">🏆 ランキングに登録</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const INK='#3A2318';
+const cheek=(x1,x2,y)=>`<ellipse cx="${x1}" cy="${y}" rx="4" ry="2.4" fill="#FF8FA3" opacity=".8"/><ellipse cx="${x2}" cy="${y}" rx="4" ry="2.4" fill="#FF8FA3" opacity=".8"/>`;
+const eyes=(x1,x2,y,r)=>`<circle cx="${x1}" cy="${y}" r="${r}" fill="${INK}"/><circle cx="${x2}" cy="${y}" r="${r}" fill="${INK}"/><circle cx="${x1+1}" cy="${y-1}" r="${r*.38}" fill="#fff"/><circle cx="${x2+1}" cy="${y-1}" r="${r*.38}" fill="#fff"/>`;
+const smile=(x,y)=>`<path d="M${x-3} ${y}q3 3 6 0" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+
+function apple(sly){
+  const face = sly
+    ? `<path d="M21 37h6M37 37h6" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/><path d="M28 42q4 2.5 8-1.5" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>`
+    : eyes(24,40,36,2.8)+smile(32,41);
+  return `<svg viewBox="0 0 64 64"><path d="M32 19C22 11 8 17 8 34c0 14 11 24 24 20 13 4 24-6 24-20 0-17-14-23-24-15z" fill="#F25454"/><path d="M14 46c4 6 10 9 18 8 8 2 15-1 19-6-6 3-12 3-19 1-7 2-13 1-18-3z" fill="#D63C46" opacity=".5"/><ellipse cx="18" cy="28" rx="3.6" ry="6" fill="#fff" opacity=".6" transform="rotate(25 18 28)"/><path d="M32 19c0-5 1-9 3-12" stroke="#7A4B2A" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M34 13c5-7 14-7 17-5-3 6-11 9-17 5z" fill="#62C46C"/>${cheek(19,45,42)}${face}</svg>`;
+}
+const GRAPE=`<svg viewBox="0 0 64 64"><path d="M32 6v9" stroke="#7A4B2A" stroke-width="3" stroke-linecap="round"/><path d="M33 10c6-6 14-5 16-2-4 5-11 6-16 2z" fill="#62C46C"/><g fill="#A374E0"><circle cx="20" cy="24" r="9"/><circle cx="32" cy="22" r="9"/><circle cx="44" cy="24" r="9"/><circle cx="26" cy="36" r="9"/><circle cx="38" cy="36" r="9"/><circle cx="32" cy="48" r="9"/></g><g fill="#fff" opacity=".55"><circle cx="17" cy="21" r="2.2"/><circle cx="29" cy="19" r="2.2"/><circle cx="41" cy="21" r="2.2"/><circle cx="29" cy="45" r="2.2"/></g>${cheek(21,43,41)}${eyes(27,37,36,2.4)}${smile(32,41)}</svg>`;
+const FIG=`<svg viewBox="0 0 64 64"><path d="M32 10c-3 0-4 3-4 6 0 6-17 12-17 28 0 10 9 15 21 15s21-5 21-15c0-16-17-22-17-28 0-3-1-6-4-6z" fill="#9A5AA6"/><ellipse cx="22" cy="38" rx="3" ry="6" fill="#fff" opacity=".45" transform="rotate(15 22 38)"/><path d="M33 12c4-6 12-6 14-3-4 4-10 5-14 3z" fill="#62C46C"/>${cheek(21,43,49)}${eyes(26,38,44,2.5)}${smile(32,49)}</svg>`;
+const LIFE=`<svg viewBox="0 0 64 64"><circle cx="32" cy="35" r="27" fill="#FFF3A6" opacity=".55"/><circle cx="32" cy="35" r="20" fill="#D9F7EC" stroke="#86DDBC" stroke-width="3"/><ellipse cx="24" cy="28" rx="4" ry="6" fill="#fff" transform="rotate(25 24 28)"/><path d="M33 15c4-7 12-7 15-4-4 5-11 6-15 4z" fill="#62C46C"/><path d="M24 36q3-3.5 6 0M34 36q3-3.5 6 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M28 41q4 5 8 0z" fill="#E86A7E"/>${cheek(21,43,41)}<path d="M54 10l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z M9 46l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#FFD84A"/></svg>`;
+const SNAKE=`<svg viewBox="0 0 80 120"><path d="M58 -4c0 28-32 24-32 52 0 18 20 20 20 34" stroke="#63BE63" stroke-width="17" fill="none" stroke-linecap="round"/><g fill="#9BE08E"><circle cx="57" cy="14" r="3"/><circle cx="44" cy="31" r="3"/><circle cx="29" cy="50" r="3"/><circle cx="35" cy="70" r="3"/></g><ellipse cx="45" cy="92" rx="22" ry="17" fill="#74CF74"/><circle cx="36" cy="88" r="7" fill="#fff"/><circle cx="54" cy="88" r="7" fill="#fff"/><circle cx="37" cy="89" r="4.2" fill="${INK}"/><circle cx="55" cy="89" r="4.2" fill="${INK}"/><circle cx="38.5" cy="87.5" r="1.5" fill="#fff"/><circle cx="56.5" cy="87.5" r="1.5" fill="#fff"/><ellipse cx="29" cy="98" rx="4" ry="2.4" fill="#FF8FA3" opacity=".8"/><ellipse cx="61" cy="98" rx="4" ry="2.4" fill="#FF8FA3" opacity=".8"/><path d="M41 100q4 3 8 0" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M45 102v8l-3 4M45 110l3 4" stroke="#E5486A" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+
+function flowers(){
+  const pts=[[34,36,'#fff'],[46,28,'#FFB8C8'],[60,25,'#fff'],[74,28,'#FFB8C8'],[86,36,'#fff']];
+  return '<g>'+pts.map(([x,y,c])=>`<g><circle cx="${x-3}" cy="${y}" r="3.2" fill="${c}"/><circle cx="${x+3}" cy="${y}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y-3}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y+3}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y}" r="2" fill="#FFD84A"/></g>`).join('')+'</g>';
+}
+function eveSvg(leaves){
+  return `<svg viewBox="0 0 120 130">
+  <path d="M16 62C16 30 36 14 60 14s44 16 44 48v52c0 7-7 9-11 4-4 6-12 6-16 1-6 4-28 4-34 0-4 5-12 5-16-1-4 5-11 3-11-4z" fill="#8A5634"/>
+  <ellipse cx="60" cy="116" rx="24" ry="14" fill="#FFE2CC"/>
+  ${leaves?`<g><path d="M30 130c2-16 14-24 30-18 16-6 28 2 30 18z" fill="#5DBB63"/><path d="M60 112v18M46 118l8 6M74 118l-8 6" stroke="#3E9A4A" stroke-width="2" stroke-linecap="round"/><path d="M28 112c-10-6-12-16-8-22 8 2 12 12 8 22z" fill="#6CCB72"/><path d="M92 112c10-6 12-16 8-22-8 2-12 12-8 22z" fill="#6CCB72"/></g>`:''}
+  <path d="M18 62c-2 26 2 46 10 58l12-4c-8-16-10-34-6-54zM102 62c2 26-2 46-10 58l-12-4c8-16 10-34 6-54z" fill="#8A5634"/>
+  <ellipse cx="60" cy="66" rx="34" ry="32" fill="#FFE2CC"/>
+  <path d="M26 62c0-22 14-36 34-36s34 14 34 36c-6-8-14-12-22-10-2-6-8-10-13-8-4-4-12-2-14 6-8-2-15 4-19 12z" fill="#8A5634"/>
+  <path d="M40 34c6-4 14-6 20-6" stroke="#B07A50" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  ${flowers()}
+  <g class="e-open"><ellipse cx="46" cy="70" rx="5.2" ry="6.8" fill="${INK}"/><ellipse cx="74" cy="70" rx="5.2" ry="6.8" fill="${INK}"/><circle cx="48" cy="67" r="2.2" fill="#fff"/><circle cx="76" cy="67" r="2.2" fill="#fff"/><circle cx="44.5" cy="73" r="1" fill="#fff"/><circle cx="72.5" cy="73" r="1" fill="#fff"/></g>
+  <path class="e-happy" d="M40 71q6-6.5 12 0M68 71q6-6.5 12 0" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="37" cy="80" rx="6" ry="3.5" fill="#FF9AAE" opacity=".75"/><ellipse cx="83" cy="80" rx="6" ry="3.5" fill="#FF9AAE" opacity=".75"/>
+  <path class="m-smile" d="M55 83q5 5 10 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <g class="m-eat"><ellipse cx="60" cy="86" rx="6.5" ry="6" fill="#C9475C"/><ellipse cx="60" cy="89" rx="4" ry="2.4" fill="#FF8C9C"/></g>
+  <ellipse class="m-shock" cx="60" cy="86" rx="3.6" ry="4.6" fill="#C9475C"/>
+  <path class="sweat" d="M92 48c3 5 4 8 2 10-2 2-5 0-4-3z" fill="#9FD8FF"/>
+  </svg>`;
+}
+
+document.querySelectorAll('[data-ico]').forEach(el=>{
+  el.innerHTML={apple:apple(false),grape:GRAPE,fig:FIG,life:LIFE,snake:SNAKE,forbid:apple(true)}[el.dataset.ico];
+});
+document.getElementById('eve').innerHTML=eveSvg(false);
+document.getElementById('leafEve').innerHTML=eveSvg(true);
+document.getElementById('titleEve').innerHTML=eveSvg(false);
+document.getElementById('serpent').innerHTML=SNAKE;
+document.getElementById('rvJesus').innerHTML=`<svg viewBox="0 0 200 220">
+<circle cx="100" cy="60" r="52" fill="#FFF8D6" opacity=".8"/>
+<circle cx="100" cy="60" r="40" fill="none" stroke="#FFD54A" stroke-width="5"/>
+<path d="M72 62C72 36 84 26 100 26s28 10 28 36l2 32c-8 6-18 4-22-2H92c-4 6-14 8-22 2z" fill="#7A4A2C"/>
+<path d="M100 92c-20 0-30 12-34 30L36 114c-10-2-16 6-12 14l40 14-8 74h88l-8-74 40-14c4-8-2-16-12-14l-30 8c-4-18-14-30-34-30z" fill="#fff" stroke="#EDE3CC" stroke-width="2"/>
+<path d="M78 100c12 20 32 52 40 116h14c-8-66-30-100-44-120z" fill="#D9534F" opacity=".9"/>
+<circle cx="26" cy="122" r="8" fill="#F6D2B4"/><circle cx="174" cy="122" r="8" fill="#F6D2B4"/>
+<circle cx="26" cy="122" r="2" fill="#C98A7A"/><circle cx="174" cy="122" r="2" fill="#C98A7A"/>
+<ellipse cx="100" cy="62" rx="22" ry="25" fill="#F6D2B4"/>
+<path d="M78 58c2-18 12-24 22-24s20 6 22 24c-6-10-14-14-22-12-8-2-16 2-22 12z" fill="#7A4A2C"/>
+<path d="M80 68c2 18 12 24 20 24s18-6 20-24c-6 12-12 14-20 14s-14-2-20-14z" fill="#7A4A2C"/>
+<path d="M88 62q4 3 8 0M104 62q4 3 8 0" stroke="#3A2318" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<ellipse cx="85" cy="70" rx="4" ry="2.2" fill="#FF9AAE" opacity=".6"/><ellipse cx="115" cy="70" rx="4" ry="2.2" fill="#FF9AAE" opacity=".6"/>
+<path d="M95 75q5 3 10 0" stroke="#3A2318" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`;
+document.getElementById('stSnake').innerHTML=SNAKE;
+document.getElementById('stFoot').innerHTML=`<svg viewBox="0 0 120 160">
+<path d="M60 40C88 40 98 70 94 100s-16 56-34 56-28-24-30-52c-4-34 4-64 30-64z" fill="#F6D2B4" stroke="#8B5A2B" stroke-width="6"/>
+<g fill="#F6D2B4" stroke="#C9A080" stroke-width="1.5"><circle cx="38" cy="34" r="11"/><circle cx="56" cy="26" r="9"/><circle cx="71" cy="27" r="8"/><circle cx="83" cy="33" r="7"/><circle cx="92" cy="43" r="6"/></g>
+<path d="M30 72q30-12 64 0M33 112q28-10 59 0" stroke="#8B5A2B" stroke-width="9" fill="none" stroke-linecap="round"/>
+<path d="M45 44l14 26" stroke="#8B5A2B" stroke-width="6" stroke-linecap="round"/>
+<circle cx="62" cy="90" r="4" fill="#C98A7A"/>
+</svg>`;
+document.getElementById('cutSnake').innerHTML=SNAKE.replace('<svg ','<svg preserveAspectRatio="xMidYMax meet" ');
+document.getElementById('bigSnakeArt').innerHTML=SNAKE.replace('<svg ','<svg preserveAspectRatio="xMidYMax meet" ');
+
+const TYPES={
+  apple:{html:apple(false),pts:10,w:50,sp:1},
+  grape:{html:GRAPE,pts:15,w:30,sp:1.25},
+  fig:{html:FIG,pts:20,w:14,sp:1.5},
+  life:{html:LIFE,pts:50,w:3,time:5,sp:1.9}
+};
+const FORBID=apple(true);
+const VERSES=[
+  {t:'「すなわち、すべての人は罪を犯したため、<br>神の栄光を受けられなくなっており」',r:'ローマ人への手紙 3章23節'},
+  {t:'「義人はいない、ひとりもいない。」',r:'ローマ人への手紙 3章10節'},
+  {t:'「しかし善悪を知る木からは取って食べてはならない。<br>それを取って食べると、きっと死ぬであろう」',r:'創世記 2章17節'},
+  {t:'「さてあなたがたは、先には自分の罪過と罪とによって<br>死んでいた者であって」',r:'エペソ人への手紙 2章1節'},
+  {t:'「欲がはらんで罪を生み、罪が熟して死を生む。」',r:'ヤコブの手紙 1章15節'},
+  {t:'「ただ、あなたがたの不義があなたがたと、<br>あなたがたの神との間を隔てたのだ。」',r:'イザヤ書 59章2節'},
+  {t:'「われわれはみな羊のように迷って、<br>おのおの自分の道に向かって行った。」',r:'イザヤ書 53章6節'},
+  {t:'「善を行い、罪を犯さない正しい人は世にいない。」',r:'伝道の書 7章20節'},
+  {t:'「もし、罪がないと言うなら、それは自分を欺くことであって、<br>真理はわたしたちのうちにない。」',r:'ヨハネの第一の手紙 1章8節'}
+];
+const LOVE=[
+  {t:'「神はそのひとり子を賜わったほどに、この世を愛して下さった。<br>それは御子を信じる者がひとりも滅びないで、<br>永遠の命を得るためである。」',r:'ヨハネによる福音書 3章16節'},
+  {t:'「しかし、まだ罪人であった時、わたしたちのために<br>キリストが死んで下さったことによって、<br>神はわたしたちに対する愛を示されたのである。」',r:'ローマ人への手紙 5章8節'},
+  {t:'「あなたはわが目に尊く、重んぜられるもの、<br>わたしはあなたを愛する」',r:'イザヤ書 43章4節'},
+  {t:'「わたしは限りなき愛をもってあなたを愛している。」',r:'エレミヤ書 31章3節'},
+  {t:'「神はそのひとり子を世につかわし、<br>彼によってわたしたちを生きるようにして下さった。<br>それによって、わたしたちに対する神の愛が<br>明らかにされたのである。」',r:'ヨハネの第一の手紙 4章9節'},
+  {t:'「神は愛である。」',r:'ヨハネの第一の手紙 4章16節'},
+  {t:'「彼はあなたのために喜び楽しみ、<br>その愛によってあなたを新にし」',r:'ゼパニヤ書 3章17節'}
+];
+const BIG_WHISPERS=['さあ、食べてごらん…','食べても決して死ぬことはない…','神のように善悪を知る者になれるよ…'];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const showVerse=(id,v)=>{$(id).innerHTML=v.t+'<span class="ref">'+v.r+'（口語訳）</span>'};
+const $=id=>document.getElementById(id);
+const SND=(function(){
+  let ctx=null,master,bgmG,sfxG,nbuf,muted=false,mode=null,step=0,nextT=0;
+  try{muted=localStorage.getItem('eden_mute')==='1'}catch(e){}
+  const mtof=m=>440*Math.pow(2,(m-69)/12);
+  function init(){
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    if(ctx){if(ctx.state==='suspended')ctx.resume();return}
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    ctx=new AC();
+    master=ctx.createGain();master.gain.value=muted?0:.9;
+    const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
+    bgmG=ctx.createGain();bgmG.gain.value=.3;bgmG.connect(master);
+    sfxG=ctx.createGain();sfxG.gain.value=.9;sfxG.connect(master);
+    nbuf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);
+    const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    setInterval(sched,25);
+  }
+  function tone(f,t,dur,o={}){
+    const {type='sine',vol=.3,att=.005,dest=sfxG,to=null,det=0}=o;
+    const os=ctx.createOscillator(),g=ctx.createGain();
+    os.type=type;os.frequency.setValueAtTime(f,t);os.detune.value=det;
+    if(to)os.frequency.exponentialRampToValueAtTime(to,t+dur);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+att);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    os.connect(g);g.connect(dest);os.start(t);os.stop(t+dur+.05);
+  }
+  function noise(t,dur,o={}){
+    const {vol=.3,type='lowpass',f=1000,to=null,q=1,att=.005,dest=sfxG}=o;
+    const sr=ctx.createBufferSource();sr.buffer=nbuf;sr.loop=true;
+    const fl=ctx.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);fl.Q.value=q;
+    if(to)fl.frequency.exponentialRampToValueAtTime(to,t+dur);
+    const g=ctx.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+att);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    sr.connect(fl);fl.connect(g);g.connect(dest);sr.start(t);sr.stop(t+dur+.05);
+  }
+  const arp=(notes,t,gap,dur,o)=>notes.forEach((n,i)=>tone(mtof(n),t+i*gap,dur,o));
+  const MEL=[72,0,76,79,76,0,74,72, 69,0,72,76,74,0,72,69, 65,0,69,72,74,72,69,0, 67,0,71,74,79,77,74,71];
+  const BASS=[48,45,41,43];
+  const CH=[[60,64,67],[57,60,64],[53,57,60],[55,59,62]];
+  const SERP=[40,40,52,40,40,51,40,47];
+  function sched(){
+    if(!ctx||!mode)return;
+    if(nextT<ctx.currentTime)nextT=ctx.currentTime+.02;
+    while(nextT<ctx.currentTime+.12){
+      playStep(step,nextT);
+      nextT+={game:.27,serpent:.16,heaven:.6,bonus:.15}[mode];step++;
+    }
+  }
+  function playStep(i,t){
+    if(mode==='game'){
+      const s=i%32,bar=Math.floor(s/8),m=MEL[s];
+      if(m)tone(mtof(m),t,.38,{type:'triangle',vol:.2,dest:bgmG});
+      if(s%8===0){tone(mtof(BASS[bar]),t,1,{vol:.26,dest:bgmG});CH[bar].forEach(n=>tone(mtof(n),t,2.1,{vol:.045,att:.3,dest:bgmG}))}
+      if(s%8===4)tone(mtof(BASS[bar]+7),t,.8,{vol:.16,dest:bgmG});
+      if(s%2===1)noise(t,.05,{vol:.035,type:'highpass',f:7000,dest:bgmG});
+    }else if(mode==='bonus'){
+      const s=i%32,bar=Math.floor(s/8),m=MEL[s];
+      if(m)tone(mtof(m+12),t,.2,{type:'square',vol:.07,dest:bgmG});
+      if(s%2===0)tone(mtof(BASS[bar]+(s%4?7:0)),t,.2,{type:'triangle',vol:.2,dest:bgmG});
+      if(s%4===0)tone(120,t,.15,{vol:.4,to:45,dest:bgmG});
+      noise(t,.04,{vol:.05,type:'highpass',f:8000,dest:bgmG});
+    }else if(mode==='serpent'){
+      const s=i%8;
+      tone(mtof(SERP[s]),t,.15,{type:'sawtooth',vol:.1,dest:bgmG});
+      if(s%2===0)noise(t,.04,{vol:.07,type:'highpass',f:5000,dest:bgmG});
+      if(s===0)tone(70,t,.25,{vol:.45,to:35,dest:bgmG});
+      if(i%16===8)tone(mtof(76),t,.3,{type:'square',vol:.04,dest:bgmG});
+    }else if(mode==='heaven'){
+      if(i%4===0)CH[Math.floor(i/4)%4].forEach(n=>[0,12].forEach(o=>{
+        tone(mtof(n+o),t,2.8,{vol:.05,att:.8,dest:bgmG});
+        tone(mtof(n+o),t,2.8,{type:'triangle',vol:.025,att:.9,det:9,dest:bgmG})}));
+      tone(mtof([84,88,91,86][i%4]),t+.3,1.5,{vol:.045,dest:bgmG});
+    }
+  }
+  function bgm(m){if(!ctx||m===mode)return;mode=m;step=0;nextT=ctx.currentTime+.08}
+  function play(n,o={}){
+    if(!ctx)return;const t=ctx.currentTime+.01;
+    switch(n){
+      case 'start':arp([72,76,79,84],t,.08,.4,{type:'triangle',vol:.2});break;
+      case 'eat':{const f=620*(1+Math.min(o.combo||0,15)*.035);tone(f,t,.12,{vol:.3,to:f*1.8});noise(t,.04,{vol:.12,type:'bandpass',f:2500,q:2});break}
+      case 'life':arp([84,88,91,96,100],t,.05,.5,{type:'triangle',vol:.14});break;
+      case 'forbid':tone(120,t,1.1,{vol:.6,to:35});tone(233,t,.9,{type:'sawtooth',vol:.1});tone(330,t,.9,{type:'sawtooth',vol:.1});noise(t,.8,{vol:.4,f:2500,to:150});break;
+      case 'cutin':
+        tone(180,t,.35,{type:'sawtooth',vol:.15,to:1400});noise(t,.35,{vol:.15,type:'bandpass',f:600,to:5000,q:3});
+        [64,68,71,76].forEach(m=>tone(mtof(m),t+.35,.6,{type:'square',vol:.06}));
+        noise(t+.35,.3,{vol:.4,f:6000,to:300});tone(90,t+.35,.4,{vol:.6,to:40});
+        [0,.1,.2,.3].forEach(d=>tone(150,t+.75+d,.08,{vol:.35,to:70}));break;
+      case 'hit':noise(t,.08,{vol:.4,type:'bandpass',f:1800,q:1.5});tone(170,t,.12,{vol:.5,to:55});break;
+      case 'crush':tone(320,t,.6,{vol:.5,to:40});noise(t,.7,{vol:.5,f:4000,to:150});arp([88,95,100],t+.2,.07,.6,{type:'triangle',vol:.12});break;
+      case 'hiss':noise(t,1.6,{vol:.22,type:'highpass',f:3500,att:.3});tone(55,t,2.2,{type:'sawtooth',vol:.08,att:.4});tone(58,t,2.2,{type:'sawtooth',vol:.06,att:.4});break;
+      case 'hissLow':noise(t,1.2,{vol:.12,type:'highpass',f:4000,att:.2});tone(49,t,1.8,{type:'sawtooth',vol:.07,att:.3});break;
+      case 'gameover':arp([69,65,62,57],t+.3,.38,.9,{type:'triangle',vol:.15});tone(mtof(45),t+1.8,2,{vol:.2});break;
+      case 'descend':arp([60,62,64,67,69,72,74,76,79,81,84,86,88,91],t,.06,1.2,{type:'triangle',vol:.06});break;
+      case 'beam':tone(mtof(84),t,1.8,{vol:.08,att:.2});tone(mtof(91),t,1.8,{vol:.06,att:.3});noise(t,1.2,{vol:.08,type:'highpass',f:6000,att:.3});break;
+      case 'whoosh':noise(t,.9,{vol:.35,type:'bandpass',f:300,to:4000,q:1.2,att:.7});tone(200,t,.9,{type:'sawtooth',vol:.05,att:.7,to:900});break;
+      case 'impact':
+        tone(160,t,1.4,{vol:.9,to:28});tone(55,t,1.8,{vol:.5});
+        noise(t,1.2,{vol:.8,f:6000,to:80});noise(t,.15,{vol:.5,type:'highpass',f:3000});
+        [72,76,79,84,88].forEach(m=>tone(mtof(m),t+.15,2,{type:'triangle',vol:.07,att:.05}));
+        arp([96,100,103,108],t+.25,.06,.8,{vol:.06});break;
+      case 'fukkatsu':arp([67,72,76,79],t,.1,.4,{type:'square',vol:.07});[72,76,79,84].forEach(m=>tone(mtof(m),t+.42,1.3,{type:'triangle',vol:.1}));noise(t+.42,.3,{vol:.15,f:5000,to:500});break;
+      case 'bonus':
+        tone(200,t,.4,{type:'sawtooth',vol:.12,to:1600});
+        arp([72,76,79,84,88,91,96],t+.35,.06,.5,{type:'square',vol:.06});
+        [72,76,79,84].forEach(m=>tone(mtof(m),t+.8,1.6,{type:'triangle',vol:.1}));
+        noise(t+.35,.4,{vol:.35,f:7000,to:400});tone(100,t+.35,.5,{vol:.6,to:40});
+        arp([84,88,91,96,100,103,108],t+1.4,.08,.6,{vol:.05});break;
+      case 'clear':arp([60,64,67,72,67,72,76,79],t,.11,.35,{type:'square',vol:.06});[60,64,67,72,76].forEach(m=>tone(mtof(m),t+.95,1.8,{type:'triangle',vol:.09}));break;
+    }
+  }
+  function setMute(v){muted=v;try{localStorage.setItem('eden_mute',v?'1':'')}catch(e){}if(ctx)master.gain.setTargetAtTime(v?0:.9,ctx.currentTime,.02)}
+  return {init,bgm,play,setMute,isMuted:()=>muted};
+})();
+const app=$('app'),field=$('field'),eve=$('eve');
+let fruits=[],score=0,timeLeft=45,combo=0,running=false,last=0,spawnT=0;
+const DBG={on:false,paused:false,invincible:false,revive:'normal'};
+let bonusMode=false,bonusDone=false,bonusStart=0,reviveTimer=0,reviveUsed=false,freezeT=0,elapsed=0,serpentOn=false,serpentTimer=0,serpentNext=14,hitsLeft=0,serpentLimit=4;
+
+function getBest(){try{return +localStorage.getItem('eden_best')||0}catch(e){return 0}}
+function setBest(v){try{localStorage.setItem('eden_best',v)}catch(e){}}
+function showBestStart(){const b=getBest();$('bestStart').textContent=b?'ハイスコア '+b+'点':''}
+showBestStart();
+function stage(){return elapsed<15?1:elapsed<30?2:3}
+
+function pickType(){
+  let rate=[0,.12,.18,.24][stage()];
+  if(serpentOn)rate+=.15;
+  if(bonusMode)rate=0;
+  if(Math.random()<rate)return 'forbid';
+  const total=Object.values(TYPES).reduce((a,t)=>a+t.w,0);
+  let r=Math.random()*total;
+  for(const k in TYPES){r-=TYPES[k].w;if(r<=0)return k}
+  return 'apple';
+}
+function spawn(forceKind){
+  const kind=forceKind||pickType(),W=app.clientWidth,H=app.clientHeight;
+  const el=document.createElement('button');
+  el.className='fruit';el.setAttribute('aria-label','くだもの');
+  let look=stage();if(serpentOn)look=Math.min(3,look+1);
+  if(kind==='forbid'){
+    el.innerHTML=FORBID;
+    if(look<3)el.classList.add('forbid'+look);
+    if(look>=2){const m=document.createElement('span');m.className='mark';m.textContent='✦';el.appendChild(m)}
+  }else el.innerHTML=TYPES[kind].html;
+  const f={el,kind,x:40+Math.random()*(W-80),y:H*.14+Math.random()*H*.06,
+    vy:(110+Math.random()*60)*1.44*(1+(stage()-1)*.4)*(kind==='forbid'?1:TYPES[kind].sp),sway:Math.random()*Math.PI*2,dead:false};
+  el.addEventListener('pointerdown',e=>{e.preventDefault();tapFruit(f)});
+  field.appendChild(el);fruits.push(f);place(f);
+}
+function place(f){f.el.style.left=(f.x+Math.sin(f.sway)*6)+'px';f.el.style.top=f.y+'px'}
+function popText(x,y,t,cls){
+  const p=document.createElement('div');p.className='pop'+(cls?' '+cls:'');p.textContent=t;
+  p.style.left=(x-14)+'px';p.style.top=(y-44)+'px';app.appendChild(p);setTimeout(()=>p.remove(),800);
+}
+function setFace(face,ms){
+  eve.dataset.face=face;clearTimeout(eve._t);
+  if(ms)eve._t=setTimeout(()=>{eve.dataset.face='smile';eve.classList.remove('chomp')},ms);
+}
+function tapFruit(f){
+  if(!running||f.dead||freezeT>0)return;f.dead=true;
+  if(f.kind==='forbid'){
+    if(DBG.invincible){f.el.classList.add('eaten');setTimeout(()=>f.el.remove(),260);popText(f.x,f.y,'無敵');return}
+    gameOver();return}
+  const t=TYPES[f.kind];combo++;SND.play(t.time?'life':'eat',{combo});
+  const mult=combo>=10?3:combo>=5?2:1,gain=t.pts*mult;score+=gain;
+  if(t.time&&!bonusMode){timeLeft+=t.time;popText(f.x,f.y,'+'+gain+' ＋5秒')}else popText(f.x,f.y,'+'+gain);
+  f.el.classList.add('eaten');setTimeout(()=>f.el.remove(),260);
+  eve.classList.add('chomp');setFace('eat',260);
+  updateHud();
+}
+function updateHud(){
+  $('score').textContent=score;$('time').textContent=Math.ceil(timeLeft);
+  $('timePill').classList.toggle('low',timeLeft<=10);
+  $('stageLbl').textContent=bonusMode?'祝福タイム':'ステージ'+stage();
+  const c=$('combo');
+  if(combo>=5){c.textContent=combo+'コンボ ×'+(combo>=10?3:2);c.classList.add('show')}else c.classList.remove('show');
+}
+
+const serpent=$('serpent'),bubble=$('bubble');
+const WHISPERS=['食べてもいいんだよ…','それ、おいしそうだね…','神のようになれるよ…','ほんとうに死ぬかな…？'];
+function serpentIn(){
+  const side=Math.random()<.5?'left':'right';
+  serpent.className='serpent '+side;serpent.hidden=false;
+  bubble.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
+  bubble.style.left=side==='right'?'14px':'auto';bubble.style.right=side==='left'?'14px':'auto';
+  bubble.dataset.side=side;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{serpent.classList.add('in');bubble.classList.add('show')}));
+  hitsLeft=5+stage()*2;serpentLimit=4;serpentTimer=serpentLimit;
+  const g=$('sgauge');g.className='sgauge show '+side;
+  $('shits').textContent='あと'+hitsLeft+'回！';$('sbar').style.width='100%';
+  serpentOn=true;
+  freezeT=1.3;fx('cutin',1300);fx2(app,'quake');buzz([60,40,60]);SND.play('cutin');SND.bgm('serpent');
+}
+function fx(id,ms){const el=$(id);el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),ms)}
+function fx2(el,c){el.classList.remove(c);void el.offsetWidth;el.classList.add(c)}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+const HITS=['バシッ！','ドカッ！','ガッ！','ズドン！'];
+function serpentOut(){
+  serpent.classList.remove('in');bubble.classList.remove('show');$('sgauge').classList.remove('show');
+  serpentOn=false;serpentNext=8+Math.random()*6;if(running)SND.bgm('game');
+  setTimeout(()=>{if(!serpentOn){serpent.hidden=true;serpent.classList.remove('crushed')}},450);
+}
+serpent.addEventListener('pointerdown',e=>{
+  e.preventDefault();if(!running||!serpentOn||freezeT>0)return;
+  hitsLeft--;fx2(app,'bump');buzz(15);SND.play(hitsLeft<=0?'crush':'hit');
+  serpent.classList.remove('hit');void serpent.offsetWidth;serpent.classList.add('hit');
+  const r=serpent.getBoundingClientRect(),a=app.getBoundingClientRect();
+  if(hitsLeft<=0){
+    serpent.classList.add('crushed');serpentOut();updateHud();
+    $('ct').textContent='打ち砕いた！！';fx('crushfx',1000);fx2(app,'quake');buzz([80,30,120]);
+  }else{
+    $('shits').textContent='あと'+hitsLeft+'回！';
+    popText(r.left-a.left+(Math.random()*40),r.top-a.top+40+Math.random()*40,HITS[Math.floor(Math.random()*HITS.length)],'hitpop');
+  }
+});
+
+function loop(ts){
+  if(!running)return;
+  const dt=Math.min(.05,(ts-last)/1000||0);last=ts;
+  if(DBG.paused){requestAnimationFrame(loop);return}
+  if(freezeT>0){freezeT-=dt;requestAnimationFrame(loop);return}
+  elapsed+=dt;timeLeft-=dt;
+  const H=app.clientHeight;
+  spawnT-=dt;
+  if(spawnT<=0){spawn();spawnT=[0,.75,.6,.48][stage()]*(.7+Math.random()*.6)*(bonusMode?.1:1)}
+  if(elapsed>12&&!bonusMode){
+    if(serpentOn){
+      serpentTimer-=dt;
+      $('sbar').style.width=Math.max(0,serpentTimer/serpentLimit*100)+'%';
+      $('sgauge').classList.toggle('hurry',serpentTimer<1.5);
+      if(serpentTimer<=0){if(DBG.invincible){serpentOut()}else{gameOver(true);return}}
+    }
+    else{serpentNext-=dt;if(serpentNext<=0)serpentIn()}
+  }
+  for(const f of fruits){
+    if(f.dead)continue;
+    f.y+=f.vy*dt;f.sway+=dt*3;place(f);
+    if(f.y>H*.88){f.dead=true;f.el.remove();if(f.kind!=='forbid')combo=0}
+  }
+  fruits=fruits.filter(f=>!f.dead);
+  updateHud();
+  if(timeLeft<=0){timeUp();return}
+  requestAnimationFrame(loop);
+}
+function clearField(){fruits=[];field.innerHTML=''}
+function start(){
+  SND.init();SND.bgm('game');SND.play('start');
+  ['start','over','clear'].forEach(id=>$(id).hidden=true);
+  $('over').classList.remove('dark');clearField();
+  $('bigsnake').hidden=true;$('bigsnake').classList.remove('show');
+  $('revive').hidden=true;$('stomp').hidden=true;clearTimeout(reviveTimer);$('overBtns').style.visibility='';
+  bonusMode=false;bonusDone=false;$('timePill').classList.remove('bonus');$('bonusCut').hidden=true;
+  reviveUsed=false;freezeT=0;score=0;timeLeft=45;combo=0;elapsed=0;spawnT=.3;serpentNext=14;serpentOn=false;
+  serpent.hidden=true;serpent.className='serpent left';bubble.classList.remove('show');$('sgauge').className='sgauge';
+  $('hud').hidden=false;setFace('smile');eve.classList.remove('chomp');
+  updateHud();running=true;last=performance.now();requestAnimationFrame(loop);
+}
+function finishBest(id){
+  const b=getBest();
+  if(score>b){setBest(score);$(id).textContent='ハイスコア更新！'}else $(id).textContent='ハイスコア '+b+'点';
+}
+function gameOver(bySerpent){
+  running=false;SND.bgm(null);SND.play(bySerpent?'hiss':'forbid');
+  setFace('shock');if(serpentOn)serpentOut();
+  $('combo').classList.remove('show');
+  const willRevive=DBG.revive==='always'?bySerpent:DBG.revive==='never'?false:(bySerpent&&!reviveUsed);
+  const next=()=>{
+    showOver(bySerpent);
+    if(willRevive){$('overBtns').style.visibility='hidden';reviveTimer=setTimeout(startRevive,3600)}
+  };
+  if(bySerpent){
+    const b=$('bigsnake');
+    $('bigWhisper').textContent=pick(BIG_WHISPERS);
+    b.hidden=false;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('show')));
+    setTimeout(next,2200);
+  }else{
+    const fl=$('flash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
+    next();
+  }
+}
+function startRevive(){
+  reviveUsed=true;
+  const rv=$('revive');rv.className='revive';rv.hidden=false;
+  rv.querySelector('.rv-body').scrollTop=0;
+  const steps=[[50,'s1'],[1100,'s2'],[2600,'s3'],[3500,'s4'],[8500,'s5']];
+  reviveTimer=setTimeout(()=>{if(!rv.hidden)doRevive()},10500);
+  steps.forEach(([t,c])=>setTimeout(()=>{if(!rv.hidden){rv.classList.add(c);if(c==='s2'){SND.bgm('heaven');SND.play('descend');$('bigsnake').hidden=true;$('bigsnake').classList.remove('show')}}},t));
+}
+function makeParticles(){
+  const box=$('stParts');box.innerHTML='';
+  for(let i=0;i<34;i++){
+    const a=Math.random()*Math.PI*2,d=90+Math.random()*170;
+    const p=document.createElement('span');p.className='st-p';
+    p.style.setProperty('--dx',Math.cos(a)*d+'px');
+    p.style.setProperty('--dy',(Math.sin(a)*d*.75-30)+'px');
+    p.style.setProperty('--s',(4+Math.random()*8)+'px');
+    p.style.setProperty('--t',(.6+Math.random()*.7)+'s');
+    box.appendChild(p);
+  }
+}
+function doRevive(){
+  const rv=$('revive'),st=$('stomp');
+  rv.hidden=true;rv.className='revive';
+  $('over').hidden=true;$('over').classList.remove('dark');$('overBtns').style.visibility='';
+  $('bigsnake').hidden=true;$('bigsnake').classList.remove('show');
+  makeParticles();
+  st.className='stomp';st.hidden=false;SND.bgm(null);SND.play('hissLow');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>st.classList.add('show')));
+  setTimeout(()=>SND.play('beam'),250);
+  setTimeout(()=>SND.play('whoosh'),900);
+  setTimeout(()=>{st.classList.add('hit');fx2(app,'quake');buzz([150,40,100,40,60]);SND.play('impact')},1800);
+  setTimeout(()=>{
+    fx2($('fullflash'),'go');buzz([100,50,150]);SND.play('fukkatsu');
+    setTimeout(()=>{
+      st.hidden=true;st.className='stomp';
+      clearField();setFace('eat');setTimeout(()=>setFace('smile'),900);
+      $('ct').textContent='復活！！';fx('crushfx',1000);fx2(app,'quake');
+      serpentOn=false;serpentNext=7;freezeT=1;combo=0;
+      running=true;last=performance.now();requestAnimationFrame(loop);
+      SND.bgm('game');
+    },350);
+  },3900);
+}
+function showOver(bySerpent){
+  $('overMsg').innerHTML=bySerpent?'ヘビにだまされて<br>善悪の知識の実を<br>食べてしまった…':'善悪の知識の実を<br>食べてしまった…';
+  showVerse('verse',pick(VERSES));
+  lastResult=score;resultId++;
+  $('overScore').textContent=score+'点';finishBest('overBest');SND.play('gameover');
+  $('over').hidden=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('over').classList.add('dark')));
+}
+function timeUp(){
+  if(!bonusDone){startBonus();return}
+  finalClear();
+}
+function startBonus(){
+  bonusDone=true;running=false;timeLeft=0;updateHud();if(serpentOn)serpentOut();
+  clearField();$('combo').classList.remove('show');setFace('eat');
+  SND.bgm(null);SND.play('bonus');fx2(app,'quake');buzz([80,40,80,40,160]);
+  const bc=$('bonusCut');bc.className='bcut';bc.hidden=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>bc.classList.add('show')));
+  reviveTimer=setTimeout(()=>{
+    bc.hidden=true;bc.className='bcut';
+    bonusMode=true;bonusStart=score;timeLeft=10;spawnT=0;freezeT=0;
+    $('timePill').classList.add('bonus');setFace('smile');
+    SND.bgm('bonus');SND.play('start');
+    running=true;last=performance.now();updateHud();requestAnimationFrame(loop);
+  },6500);
+}
+function finalClear(){
+  running=false;SND.bgm(null);SND.play('clear');timeLeft=0;updateHud();if(serpentOn)serpentOut();
+  clearField();$('combo').classList.remove('show');setFace('eat');
+  showVerse('clearVerse',pick(LOVE));
+  const bonusPts=bonusMode?score-bonusStart:0,base=score-bonusPts;
+  bonusMode=false;$('timePill').classList.remove('bonus');
+  score+=1000;
+  $('clearBonus').innerHTML=base+'点 ＋ 祝福タイム '+bonusPts+'点<br>＋ クリアボーナス 1000点';
+  lastResult=score;resultId++;
+  $('clearScore').textContent=score+'点';finishBest('clearBest');$('clear').hidden=false;
+}
+// ---- debug mode ----
+function ensureGame(){if(!running){hideScreens();start()}}
+function hideScreens(){['start','over','clear'].forEach(id=>$(id).hidden=true);$('over').classList.remove('dark');$('revive').hidden=true;$('bigsnake').hidden=true;$('bigsnake').classList.remove('show');clearTimeout(reviveTimer);$('overBtns').style.visibility=''}
+function setDebug(on){
+  DBG.on=on;try{localStorage.setItem('eden_debug',on?'1':'')}catch(e){}
+  $('dbgToggle').hidden=!on;$('dbg').hidden=!on;
+}
+function syncDbg(){
+  $('dbgPause').classList.toggle('on',DBG.paused);$('dbgPause').textContent=DBG.paused?'再開':'一時停止';
+  $('dbgInv').classList.toggle('on',DBG.invincible);$('dbgInv').textContent='無敵：'+(DBG.invincible?'ON':'OFF');
+  $('dbgRv').textContent='復活：'+{normal:'通常(1回まで)',always:'毎回',never:'なし'}[DBG.revive];
+}
+setInterval(()=>{if(!DBG.on||$('dbg').hidden)return;
+  $('dbgStatus').textContent=`状態:${running?'プレイ中':'停止'}  ステージ:${stage()}  残り:${Math.max(0,timeLeft).toFixed(1)}秒  点:${score}  コンボ:${combo}\nヘビ:${serpentOn?'出現中(あと'+hitsLeft+'回/'+serpentTimer.toFixed(1)+'秒)':'なし(次まで'+serpentNext.toFixed(1)+'秒)'}  復活使用:${reviveUsed?'済':'未'}`},250);
+$('dbgToggle').addEventListener('click',()=>{$('dbg').hidden=!$('dbg').hidden});
+$('dbg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const d=b.dataset.d;SND.init();
+  const [k,v]=d.split(':');
+  switch(k){
+    case 'min':$('dbg').hidden=true;break;
+    case 'off':setDebug(false);break;
+    case 'start':hideScreens();start();break;
+    case 'pause':DBG.paused=!DBG.paused;break;
+    case 'inv':DBG.invincible=!DBG.invincible;break;
+    case 'st1':ensureGame();elapsed=0;break;
+    case 'st2':ensureGame();elapsed=15;break;
+    case 'st3':ensureGame();elapsed=30;break;
+    case 't30':ensureGame();timeLeft+=30;break;
+    case 't5':ensureGame();timeLeft=5;break;
+    case 'combo':ensureGame();combo+=5;break;
+    case 'f':ensureGame();if(v==='clear')clearField();else spawn(v);break;
+    case 'snake':ensureGame();if(serpentOn)serpentOut();setTimeout(()=>{if(running)serpentIn()},serpentOn?500:0);break;
+    case 'crushNow':if(serpentOn){hitsLeft=1;serpent.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}))}break;
+    case 'snakeLose':if(serpentOn){serpentTimer=.01}else{ensureGame();serpentIn();setTimeout(()=>{if(serpentOn)serpentTimer=.01},1500)}break;
+    case 'fx':
+      if(v==='cutin'){fx('cutin',1300);SND.play('cutin')}
+      if(v==='crush'){$('ct').textContent='打ち砕いた！！';fx('crushfx',1000);SND.play('crush')}
+      if(v==='fukkatsu'){$('ct').textContent='復活！！';fx('crushfx',1000);SND.play('fukkatsu')}
+      if(v==='quake')fx2(app,'quake');
+      if(v==='flash')fx2($('fullflash'),'go');
+      if(v==='big'){SND.play('hiss');const bs=$('bigsnake');$('bigWhisper').textContent=pick(BIG_WHISPERS);bs.hidden=false;bs.classList.remove('show');
+        requestAnimationFrame(()=>requestAnimationFrame(()=>bs.classList.add('show')));
+        setTimeout(()=>{bs.classList.remove('show');setTimeout(()=>bs.hidden=true,400)},2600)}
+      break;
+    case 'go':
+      ensureGame();
+      if(v==='forbid')gameOver(false);
+      else if(v==='snake'){const m=DBG.revive;DBG.revive='never';gameOver(true);DBG.revive=m}
+      else{const m=DBG.revive;DBG.revive='always';gameOver(true);DBG.revive=m}
+      break;
+    case 'stompfx':ensureGame();running=false;if(serpentOn)serpentOut();doRevive();break;
+    case 'revive':ensureGame();running=false;if(serpentOn)serpentOut();startRevive();break;
+    case 'clear':ensureGame();bonusDone=true;timeUp();break;
+    case 'bonus':ensureGame();bonusDone=false;timeLeft=.01;break;
+    case 'title':running=false;hideScreens();clearField();if(serpentOn)serpentOut();$('hud').hidden=true;$('start').hidden=false;setFace('smile');showBestStart();break;
+    case 'rv':DBG.revive={normal:'always',always:'never',never:'normal'}[DBG.revive];break;
+    case 'rvreset':reviveUsed=false;break;
+    case 'best':setBest(0);showBestStart();break;
+  }
+  syncDbg();
+});
+// open: tap Eve on title 5 times, or add #debug to the URL
+let eveTaps=0,eveTapT=0;
+$('titleEve').style.cursor='pointer';
+$('titleEve').addEventListener('click',()=>{
+  const now=Date.now();eveTaps=(now-eveTapT<800)?eveTaps+1:1;eveTapT=now;
+  if(eveTaps>=5){eveTaps=0;setDebug(!DBG.on);if(DBG.on)$('dbg').hidden=false}
+});
+try{if(location.hash.includes('debug')||localStorage.getItem('eden_debug')==='1')setDebug(true)}catch(e){}
+syncDbg();
+
+const muteBtn=$('muteBtn');
+const syncMute=()=>{muteBtn.textContent=SND.isMuted()?'🔇':'🔊'};syncMute();
+muteBtn.addEventListener('click',()=>{SND.init();SND.setMute(!SND.isMuted());syncMute()});
+// ---- ranking ----
+// オンラインランキング: Supabaseのプロジェクトを作ったら url と key（publishable / anon key）を入れる
+const RANK_CFG={url:'',key:''};
+const rankOnline=()=>!!(RANK_CFG.url&&RANK_CFG.key);
+let lastResult=0,resultId=0,submittedId=-1,myRow=null;
+function localRows(){try{return JSON.parse(localStorage.getItem('eden_rank')||'[]')}catch(e){return []}}
+function saveLocal(r){try{localStorage.setItem('eden_rank',JSON.stringify(r))}catch(e){}}
+async function rankList(){
+  if(rankOnline()){
+    try{
+      const res=await fetch(RANK_CFG.url+'/rest/v1/scores?select=name,score,created_at&order=score.desc,created_at.asc&limit=30',{headers:{apikey:RANK_CFG.key}});
+      if(!res.ok)throw 0;return {rows:await res.json(),online:true};
+    }catch(e){}
+  }
+  return {rows:localRows().slice(0,30),online:false};
+}
+async function rankSubmit(name,sc){
+  if(rankOnline()){
+    try{
+      const res=await fetch(RANK_CFG.url+'/rest/v1/scores',{method:'POST',
+        headers:{apikey:RANK_CFG.key,'Content-Type':'application/json',Prefer:'return=minimal'},
+        body:JSON.stringify({name,score:sc})});
+      if(!res.ok)throw 0;
+      let rank=null;
+      try{
+        const c=await fetch(RANK_CFG.url+'/rest/v1/scores?select=score&score=gt.'+sc,{headers:{apikey:RANK_CFG.key,Prefer:'count=exact',Range:'0-0'}});
+        const cr=c.headers.get('content-range');if(cr&&cr.includes('/'))rank=(+cr.split('/')[1])+1;
+      }catch(e){}
+      return {ok:true,rank,online:true};
+    }catch(e){return {ok:false}}
+  }
+  const rows=localRows();const row={name,score:sc,created_at:new Date().toISOString()};
+  rows.push(row);rows.sort((a,b)=>b.score-a.score);const top=rows.slice(0,50);saveLocal(top);
+  return {ok:true,rank:top.indexOf(row)+1||null,online:false,row};
+}
+async function renderRank(){
+  const ol=$('rankList');ol.innerHTML='<li class="empty">よみこみ中…</li>';
+  const {rows,online}=await rankList();
+  $('rankMode').textContent=online?'みんなのランキング':(rankOnline()?'この端末のランキング（オンラインにつながりません）':'この端末のランキング');
+  ol.innerHTML='';
+  if(!rows.length){ol.innerHTML='<li class="empty">まだ記録がありません</li>';return}
+  rows.forEach((r,i)=>{
+    const li=document.createElement('li');
+    if(myRow&&r.name===myRow.name&&r.score===myRow.score&&r.created_at===myRow.created_at)li.className='me';
+    const rk=document.createElement('span');rk.className='rk';rk.textContent=['🥇','🥈','🥉'][i]||(i+1);
+    const nm=document.createElement('span');nm.className='nm';nm.textContent=r.name;
+    const sc=document.createElement('span');sc.className='sc';sc.textContent=r.score+'点';
+    li.append(rk,nm,sc);ol.appendChild(li);
+  });
+}
+function openRank(entry){
+  const canEntry=entry&&submittedId!==resultId;
+  $('rankEntry').hidden=!canEntry;$('rankMsg').textContent='';
+  if(canEntry){
+    $('rankScore').textContent=lastResult+'点';
+    try{$('rankName').value=localStorage.getItem('eden_name')||''}catch(e){}
+    $('rankSend').disabled=false;
+  }
+  $('rankModal').hidden=false;renderRank();
+}
+async function sendRank(){
+  const name=$('rankName').value.replace(/\s+/g,' ').trim().slice(0,10);
+  if(!name){$('rankMsg').textContent='なまえを入れてください';return}
+  $('rankSend').disabled=true;$('rankMsg').textContent='登録中…';
+  try{localStorage.setItem('eden_name',name)}catch(e){}
+  const r=await rankSubmit(name,lastResult);
+  if(!r.ok){$('rankSend').disabled=false;$('rankMsg').textContent='登録できませんでした。もう一度ためしてください';return}
+  submittedId=resultId;myRow=r.row||null;$('rankEntry').hidden=true;
+  $('rankMsg').textContent=r.rank?r.rank+'位にランクイン！':'登録しました！';
+  SND.play('life');renderRank();
+}
+$('rankSend').addEventListener('click',sendRank);
+$('rankName').addEventListener('keydown',e=>{if(e.key==='Enter')sendRank()});
+$('rankClose').addEventListener('click',()=>{$('rankModal').hidden=true});
+$('rankOpen0').addEventListener('click',()=>openRank(false));
+$('rankOpen1').addEventListener('click',()=>openRank(true));
+$('rankOpen2').addEventListener('click',()=>openRank(true));
+
+$('startBtn').addEventListener('click',start);
+$('retry1').addEventListener('click',start);
+$('retry2').addEventListener('click',start);
+})();
+</script>
+</body>
+</html>
