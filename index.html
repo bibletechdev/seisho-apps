@@ -278,7 +278,7 @@ footer{text-align:center;padding:32px 20px 40px;background:linear-gradient(var(-
       const a=b.dataset.app,on=!!m[a];
       b.setAttribute('aria-pressed',on?'true':'false');
       b.setAttribute('aria-label',on?'いいね済み':'いいね');
-      b.querySelector('.lk-n').textContent=online()&&counts[a]!=null?counts[a]:'';
+      b.querySelector('.lk-n').textContent=loaded?(+counts[a]||0).toLocaleString():'';
     });
     const t=document.getElementById('likeTotal'),sum=Object.values(counts).reduce((x,n)=>x+(+n||0),0);
     t.hidden=!loaded;t.textContent='♥ みんなのいいね 合計 '+sum.toLocaleString()+'件';
