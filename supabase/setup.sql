@@ -31,3 +31,6 @@ grant insert on public.likes to anon, authenticated;
 create or replace view public.like_counts as
   select app, count(*)::int as n from public.likes group by app;
 grant select on public.like_counts to anon, authenticated;
+
+-- Data API（PostgREST）に新しいテーブルを認識させる
+notify pgrst, 'reload schema';
