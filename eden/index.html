@@ -345,29 +345,6 @@ body{
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn2{color:#FFE9B0}}
 .btn2:active{transform:translateY(2px);box-shadow:0 1px 0 #D9962A}
 .btns{display:flex;flex-direction:column;align-items:center}
-.rmodal{position:absolute;inset:0;z-index:28;background:rgba(20,14,30,.6);display:flex;align-items:center;justify-content:center;padding:16px}
-.rmodal[hidden]{display:none}
-.rcard{background:#FFFDF6;color:#4A3426;width:100%;max-width:360px;max-height:90%;display:flex;flex-direction:column;
-  border-radius:24px;border:3px solid #F2C94C;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.rhead{font-family:"Kaisei Decol",serif;font-size:24px;font-weight:700;text-align:center;color:#8A5A00}
-.rmode{text-align:center;font-size:12px;font-weight:700;opacity:.7;margin:2px 0 8px}
-.rentry{background:#FFF4D0;border-radius:16px;padding:10px;margin-bottom:8px}
-.rentry[hidden]{display:none}
-.rscore{text-align:center;font-weight:900;font-size:22px;margin-bottom:6px}
-.rform{display:flex;gap:6px}
-.rform input{flex:1;min-width:0;font-family:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:2px solid #E6C98A;background:#fff;color:#4A3426;
-  -webkit-user-select:text;user-select:text}
-.rsend{font-family:inherit;font-size:16px;font-weight:900;border:0;border-radius:12px;padding:0 16px;background:var(--gold);color:#5A3A08;cursor:pointer}
-.rsend:disabled{opacity:.5}
-.rmsg{text-align:center;font-size:14px;font-weight:900;color:#C2571E;min-height:1.2em;margin-bottom:4px}
-.rlist{list-style:none;margin:0 0 4px;padding:0;overflow-y:auto;flex:1;min-height:120px}
-.rlist li{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px dashed #EAD9B0;font-weight:700}
-.rlist li.me{background:#FFE9A8;border-radius:10px}
-.rlist .rk{width:34px;text-align:center;font-weight:900}
-.rlist .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rlist .sc{font-weight:900}
-.rlist .empty{justify-content:center;opacity:.6;border:0}
-.rcard .btn2{align-self:center}
 .bcut{position:absolute;inset:0;z-index:11;overflow:hidden;background:radial-gradient(circle at 50% 40%,#FFF8D8,#FFC94A 45%,#E0662A 100%)}
 .b-rays{position:absolute;left:50%;top:40%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;
   background:repeating-conic-gradient(rgba(255,255,255,.6) 0 6deg,rgba(255,255,255,0) 6deg 12deg,rgba(255,150,200,.35) 12deg 18deg,rgba(255,255,255,0) 18deg 24deg);
@@ -598,23 +575,9 @@ body{
       </div>
     </div>
     <button class="btn" id="startBtn">はじめる</button>
-    <button class="btn2" id="rankOpen0">🏆 ランキング</button>
     <div class="best" id="bestStart"></div>
   </section>
 
-  <div class="rmodal" id="rankModal" hidden>
-    <div class="rcard" role="dialog" aria-label="ランキング">
-      <div class="rhead">🏆 ランキング</div>
-      <div class="rmode" id="rankMode"></div>
-      <div class="rentry" id="rankEntry">
-        <div class="rscore" id="rankScore"></div>
-        <div class="rform"><input id="rankName" maxlength="10" placeholder="なまえ（10文字まで）" autocomplete="nickname"><button class="rsend" id="rankSend">登録</button></div>
-      </div>
-      <div class="rmsg" id="rankMsg"></div>
-      <ol class="rlist" id="rankList"></ol>
-      <button class="btn2" id="rankClose">とじる</button>
-    </div>
-  </div>
   <div class="bcut" id="bonusCut" hidden aria-hidden="true">
     <div class="b-rays"></div>
     <div class="b-wrap">
@@ -669,7 +632,7 @@ body{
       <p class="verse" id="verse"></p>
       <p class="final" id="overScore"></p>
       <div class="newbest" id="overBest"></div>
-      <div id="overBtns" class="btns"><button class="btn" id="retry1">もう一度エデンへ</button><button class="btn2" id="rankOpen1">🏆 ランキングに登録</button></div>
+      <div id="overBtns" class="btns"><button class="btn" id="retry1">もう一度エデンへ</button></div>
     </div>
   </section>
 
@@ -680,7 +643,7 @@ body{
     <p class="bonus" id="clearBonus"></p>
     <p class="final" id="clearScore"></p>
     <div class="newbest" id="clearBest"></div>
-    <div class="btns"><button class="btn" id="retry2">もう一度あそぶ</button><button class="btn2" id="rankOpen2">🏆 ランキングに登録</button></div>
+    <div class="btns"><button class="btn" id="retry2">もう一度あそぶ</button></div>
   </section>
 </div>
 
@@ -1117,7 +1080,6 @@ function doRevive(){
 function showOver(bySerpent){
   $('overMsg').innerHTML=bySerpent?'ヘビにだまされて<br>善悪の知識の実を<br>食べてしまった…':'善悪の知識の実を<br>食べてしまった…';
   showVerse('verse',pick(VERSES));
-  lastResult=score;resultId++;
   $('overScore').textContent=score+'点';finishBest('overBest');SND.play('gameover');
   $('over').hidden=false;
   requestAnimationFrame(()=>requestAnimationFrame(()=>$('over').classList.add('dark')));
@@ -1148,7 +1110,6 @@ function finalClear(){
   bonusMode=false;$('timePill').classList.remove('bonus');
   score+=1000;
   $('clearBonus').innerHTML=base+'点 ＋ 祝福タイム '+bonusPts+'点<br>＋ クリアボーナス 1000点';
-  lastResult=score;resultId++;
   $('clearScore').textContent=score+'点';finishBest('clearBest');$('clear').hidden=false;
 }
 // ---- debug mode ----
@@ -1225,84 +1186,6 @@ syncDbg();
 const muteBtn=$('muteBtn');
 const syncMute=()=>{muteBtn.textContent=SND.isMuted()?'🔇':'🔊'};syncMute();
 muteBtn.addEventListener('click',()=>{SND.init();SND.setMute(!SND.isMuted());syncMute()});
-// ---- ranking ----
-// オンラインランキング: Supabaseのプロジェクトを作ったら url と key（publishable / anon key）を入れる
-const RANK_CFG={url:'',key:''};
-const rankOnline=()=>!!(RANK_CFG.url&&RANK_CFG.key);
-let lastResult=0,resultId=0,submittedId=-1,myRow=null;
-function localRows(){try{return JSON.parse(localStorage.getItem('eden_rank')||'[]')}catch(e){return []}}
-function saveLocal(r){try{localStorage.setItem('eden_rank',JSON.stringify(r))}catch(e){}}
-async function rankList(){
-  if(rankOnline()){
-    try{
-      const res=await fetch(RANK_CFG.url+'/rest/v1/scores?select=name,score,created_at&order=score.desc,created_at.asc&limit=30',{headers:{apikey:RANK_CFG.key}});
-      if(!res.ok)throw 0;return {rows:await res.json(),online:true};
-    }catch(e){}
-  }
-  return {rows:localRows().slice(0,30),online:false};
-}
-async function rankSubmit(name,sc){
-  if(rankOnline()){
-    try{
-      const res=await fetch(RANK_CFG.url+'/rest/v1/scores',{method:'POST',
-        headers:{apikey:RANK_CFG.key,'Content-Type':'application/json',Prefer:'return=minimal'},
-        body:JSON.stringify({name,score:sc})});
-      if(!res.ok)throw 0;
-      let rank=null;
-      try{
-        const c=await fetch(RANK_CFG.url+'/rest/v1/scores?select=score&score=gt.'+sc,{headers:{apikey:RANK_CFG.key,Prefer:'count=exact',Range:'0-0'}});
-        const cr=c.headers.get('content-range');if(cr&&cr.includes('/'))rank=(+cr.split('/')[1])+1;
-      }catch(e){}
-      return {ok:true,rank,online:true};
-    }catch(e){return {ok:false}}
-  }
-  const rows=localRows();const row={name,score:sc,created_at:new Date().toISOString()};
-  rows.push(row);rows.sort((a,b)=>b.score-a.score);const top=rows.slice(0,50);saveLocal(top);
-  return {ok:true,rank:top.indexOf(row)+1||null,online:false,row};
-}
-async function renderRank(){
-  const ol=$('rankList');ol.innerHTML='<li class="empty">よみこみ中…</li>';
-  const {rows,online}=await rankList();
-  $('rankMode').textContent=online?'みんなのランキング':(rankOnline()?'この端末のランキング（オンラインにつながりません）':'この端末のランキング');
-  ol.innerHTML='';
-  if(!rows.length){ol.innerHTML='<li class="empty">まだ記録がありません</li>';return}
-  rows.forEach((r,i)=>{
-    const li=document.createElement('li');
-    if(myRow&&r.name===myRow.name&&r.score===myRow.score&&r.created_at===myRow.created_at)li.className='me';
-    const rk=document.createElement('span');rk.className='rk';rk.textContent=['🥇','🥈','🥉'][i]||(i+1);
-    const nm=document.createElement('span');nm.className='nm';nm.textContent=r.name;
-    const sc=document.createElement('span');sc.className='sc';sc.textContent=r.score+'点';
-    li.append(rk,nm,sc);ol.appendChild(li);
-  });
-}
-function openRank(entry){
-  const canEntry=entry&&submittedId!==resultId;
-  $('rankEntry').hidden=!canEntry;$('rankMsg').textContent='';
-  if(canEntry){
-    $('rankScore').textContent=lastResult+'点';
-    try{$('rankName').value=localStorage.getItem('eden_name')||''}catch(e){}
-    $('rankSend').disabled=false;
-  }
-  $('rankModal').hidden=false;renderRank();
-}
-async function sendRank(){
-  const name=$('rankName').value.replace(/\s+/g,' ').trim().slice(0,10);
-  if(!name){$('rankMsg').textContent='なまえを入れてください';return}
-  $('rankSend').disabled=true;$('rankMsg').textContent='登録中…';
-  try{localStorage.setItem('eden_name',name)}catch(e){}
-  const r=await rankSubmit(name,lastResult);
-  if(!r.ok){$('rankSend').disabled=false;$('rankMsg').textContent='登録できませんでした。もう一度ためしてください';return}
-  submittedId=resultId;myRow=r.row||null;$('rankEntry').hidden=true;
-  $('rankMsg').textContent=r.rank?r.rank+'位にランクイン！':'登録しました！';
-  SND.play('life');renderRank();
-}
-$('rankSend').addEventListener('click',sendRank);
-$('rankName').addEventListener('keydown',e=>{if(e.key==='Enter')sendRank()});
-$('rankClose').addEventListener('click',()=>{$('rankModal').hidden=true});
-$('rankOpen0').addEventListener('click',()=>openRank(false));
-$('rankOpen1').addEventListener('click',()=>openRank(true));
-$('rankOpen2').addEventListener('click',()=>openRank(true));
-
 $('startBtn').addEventListener('click',start);
 $('retry1').addEventListener('click',start);
 $('retry2').addEventListener('click',start);
